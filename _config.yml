@@ -56,13 +56,6 @@ highlight:
   wrap: true
   hljs: false
 
-# 文章字数统计
-#symbols_count_time:
-#  symbols: true
-#  time: true
-#  total_symbols: true
-#  total_time: true
-
 # Home page setting
 # path: Root path for your blogs index page. (default = '')
 # per_page: Posts displayed per page. (0 = disable pagination)
