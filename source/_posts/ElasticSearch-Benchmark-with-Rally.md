@@ -3,6 +3,7 @@ title: ElasticSearch Benchmark with Rally
 tags:
   - ElasticSearch
   - Rally
+  - SRE
 categories:
   - SRE
 abbrlink: ebcc5808

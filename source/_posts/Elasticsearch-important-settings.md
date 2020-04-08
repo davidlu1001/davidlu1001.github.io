@@ -2,6 +2,7 @@
 title: Elasticsearch important settings
 tags:
   - ElasticSearch
+  - SRE
 categories: SRE
 abbrlink: aa4fabe3
 date: 2020-04-08 23:36:06
