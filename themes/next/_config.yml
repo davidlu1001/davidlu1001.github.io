@@ -181,10 +181,11 @@ site_state: true
 # Value before `||` delimiter is the target permalink, value after `||` delimiter is the name of Font Awesome icon.
 social:
   GitHub: https://github.com/davidlu1001 || github
-  #E-Mail: mailto:davidlu1001@gmail.com || envelope
+  Twitter: https://twitter.com/davidlu1001 || twitter
+  E-Mail: mailto:davidlu1001@gmail.com || envelope
+  #Zhihu: https://www.zhihu.com/people/davidlu || iconfont icon-zhihu-circle-fill
   #Weibo: https://weibo.com/yourname || weibo
   #Google: https://plus.google.com/yourname || google
-  Twitter: https://twitter.com/davidlu1001 || twitter
   #FB Page: https://www.facebook.com/yourname || facebook
   #StackOverflow: https://stackoverflow.com/yourname || stack-overflow
   #YouTube: https://youtube.com/yourname || youtube
@@ -193,7 +194,7 @@ social:
 
 social_icons:
   enable: true
-  icons_only: false
+  icons_only: true
   transition: false
 
 # Blog rolls
@@ -375,7 +376,7 @@ back2top:
 
 # Reading progress bar
 reading_progress:
-  enable: false
+  enable: true
   # Available values: top | bottom
   position: top
   color: "#37c6c0"
