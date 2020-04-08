@@ -587,7 +587,7 @@ comments:
 # Disqus
 disqus:
   enable: false
-  shortname:
+  shortname: davidlu
   count: true
   #post_meta_order: 0
 

@@ -1,5 +1,6 @@
 ---
 title: Linux - find print0 & xargs
+tags: Linux
 categories: Linux
 abbrlink: e855f10
 date: 2016-02-20 21:59:59
