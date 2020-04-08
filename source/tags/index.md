@@ -1,5 +1,5 @@
 ---
-title: tags
+title: Tags
 date: 2020-04-08 20:39:02
 type: "tags"
 ---
