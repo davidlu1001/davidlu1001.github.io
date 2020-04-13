@@ -5,7 +5,7 @@ tags:
   - Puppet
 categories: DevOps
 abbrlink: dda5d6cb
-date: 2020-04-08 23:42:16
+date: 2018-03-08 23:42:16
 ---
 
 This document outlines the steps to clean or regenerate puppet agent certificates in a traditional master/client setup.

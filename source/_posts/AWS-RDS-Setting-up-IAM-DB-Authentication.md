@@ -9,7 +9,7 @@ categories:
   - [SRE]
   - [AWS]
 abbrlink: ee94cd4e
-date: 2020-04-08 23:20:12
+date: 2020-03-13 23:20:12
 ---
 
 Firstly we need to create a RDS database account (user) within the database and associate it to 1-N IAM authentication. Below are just policies samples that the module will create behind the scenes. An example of this can be found here.

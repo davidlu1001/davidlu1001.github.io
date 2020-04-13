@@ -5,7 +5,7 @@ tags:
   - SRE
 categories: SRE
 abbrlink: '40578613'
-date: 2020-04-08 23:06:24
+date: 2019-04-28 23:06:24
 ---
 
 This document outlines the steps to move existing terraform resources to different remote states.

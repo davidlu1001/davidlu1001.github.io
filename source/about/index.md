@@ -12,7 +12,7 @@ date: 2020-03-12 16:50:53
 
 
 # <center>David Lu</center>
-###### <center><b>DevOps | SRE</b></center>
+<center><b>DevOps | SRE</b></center>
 
 David Lu has 10+ years of experience in development and maintenance of commercial 7*24 platform and industry applications using Python, Shell and Java, with expertise in Linux & AWS administration, cloud computing, Infrastructure as Code (IaC), PaaS, ETL, CI / CD, Monitoring / Logging and Microservices. 
 
