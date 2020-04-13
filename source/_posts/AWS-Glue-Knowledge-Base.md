@@ -20,8 +20,8 @@ Notes and tips for Glue when implementing the ETL process:
 
 ## Naming rules / conventions for AWS services
 - S3 bucket name can either NOT uppercase nor NOT contain "_" 
-- Dynamo DB table /Name can NOT contain "-"
-- ES /Name: can NOT contain "-"
+- Dynamo DB table / Name can NOT contain "-"
+- ES / Name: can NOT contain "-"
 
 ## ACM SSL Cert
 Using `us-east-1` region for AWS CloudFront (certificate)
@@ -139,7 +139,42 @@ Error: Inbound Rule in Security Group Required
 [AWS Doc](https://docs.aws.amazon.com/glue/latest/dg/glue-troubleshooting-errors.html#error-inbound-self-reference-rule):
 > At least one security group must open all ingress ports. To limit traffic, the source security group in your inbound rule can be restricted to the same security group.
 
-# Example - Glue Cloudformation Template
+#### Code Example - SG
+```
+ADBSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription:
+        Fn::Sub: ${AWS::StackName} A DB Security Group
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: ${Environment}-vpc-id
+      SecurityGroupIngress:
+        - CidrIp:
+            Fn::ImportValue:
+              Fn::Sub: ${Environment}-database-subnets-cidr
+          FromPort: 0
+          ToPort: 65535
+          IpProtocol: tcp
+      Tags:
+        - Key: Name
+          Value:
+            Fn::Sub:
+${AWS::StackName}-glue-A-primary-security-group
+  ASecurityGroupIngress:
+    Type: AWS::EC2::SecurityGroupIngress
+    DependsOn: ADBSecurityGroup
+    Properties:
+      GroupId:
+        Fn::Sub: ${ADBSecurityGroup.GroupId}
+      IpProtocol: tcp
+      FromPort: 0
+      ToPort: 65535
+      SourceSecurityGroupId:
+        Fn::Sub: ${ADBSecurityGroup.GroupId}
+```
+
+# Code Example - Glue Cloudformation Template
 ```
 # Glue Job
   XGlueJob:
