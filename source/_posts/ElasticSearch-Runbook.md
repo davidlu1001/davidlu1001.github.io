@@ -43,17 +43,17 @@ https://github.com/sematext/cheatsheets/blob/master/elasticsearch-devops-cheatsh
 ## Node types
 Elasticsearch nodes can take one ore more roles. Here we are using the following node types:
 
-### Master
+- Master
 
 The master node is responsible for lightweight cluster-wide actions such as creating or deleting an index, tracking which nodes are part of the cluster, and deciding which shards to allocate to which nodes. It is important for cluster health to have a stable master node. Any master-eligible node (all nodes by default) may be elected to become the master node by the master election process.
 
-### Data 
+- Data 
 
 Data nodes hold the shards that contain the documents you have indexed. Data nodes handle data related operations like CRUD, search, and aggregations. These operations are I/O-, memory-, and CPU-intensive. It is important to monitor these resources and to add more data nodes if they are overloaded. 
 
-Can be subdivided into warm and hot nodes.Data
+Can be subdivided into warm and hot nodes if want to [implementing a Hot-Warm-Cold Architecture for ES](https://www.elastic.co/blog/implementing-hot-warm-cold-in-elasticsearch-with-index-lifecycle-management)
 
-### Client
+- Client
 
 Can only route requests, handle the search reduce phase, and distribute bulk indexing. Essentially, coordinating (aka client) only nodes behave as smart load balancers. 
 
