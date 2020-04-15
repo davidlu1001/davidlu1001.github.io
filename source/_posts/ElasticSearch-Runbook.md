@@ -51,7 +51,7 @@ The master node is responsible for lightweight cluster-wide actions such as crea
 
 Data nodes hold the shards that contain the documents you have indexed. Data nodes handle data related operations like CRUD, search, and aggregations. These operations are I/O-, memory-, and CPU-intensive. It is important to monitor these resources and to add more data nodes if they are overloaded. 
 
-Can be subdivided into warm and hot nodes if want to [implementing a Hot-Warm-Cold Architecture for ES](https://www.elastic.co/blog/implementing-hot-warm-cold-in-elasticsearch-with-index-lifecycle-management)
+Can be subdivided into warm and hot nodes if wanting to [Implement a Hot-Warm-Cold Architecture for ES](https://www.elastic.co/blog/implementing-hot-warm-cold-in-elasticsearch-with-index-lifecycle-management)
 
 - Client
 
@@ -166,7 +166,7 @@ curl -XPUT localhost:9200/_cluster/settings -d '{
 
 2. Stop node (check the alias command on the host to stop a node)
 
-3. Perform maintenance/upgrade
+3. Perform maintenance / upgrade
 
 4. Restart the node, and confirm that it joined the cluster.
 
