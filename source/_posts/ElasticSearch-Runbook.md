@@ -15,7 +15,7 @@ ssh into any master node (pro-tip: master instances are the ones within the mast
 
 e.g.
 ```
-ssh elastic-master-<instance-id>.us-west-2.x.y.com
+ssh elastic-master-<instance-id>.<aws-region>.x.y.com
 ```
 
 ## Handy `aliases`
