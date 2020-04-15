@@ -6,6 +6,40 @@ abbrlink: e855f10
 date: 2016-02-20 21:59:59
 ---
 
+## Errors
+```
+root@elastic-data:/mnt/elasticsearch/nodes/0/indices# ls -rthl
+...
+drwxr-xr-x   4 elasticsearch elasticsearch 4.0K Apr 15 14:55 _nGsAa--TU-Yt8zAsPWzBw
+drwxr-xr-x   5 elasticsearch elasticsearch 4.0K Apr 15 14:55 -hqCV4oLRG-ttGc8A93BVw
+drwxr-xr-x   5 elasticsearch elasticsearch 4.0K Apr 15 14:55 y4ORbH-YRL65u5JPRWyM3A
+...
+
+root@elastic-data:/mnt/elasticsearch/nodes/0/indices# du -sh *
+du: invalid option -- '6'
+du: invalid option -- 'w'
+du: invalid option -- 'U'
+du: invalid option -- 'g'
+du: invalid option -- 'E'
+du: invalid option -- 'Q'
+du: invalid option -- 'q'
+du: invalid option -- 'I'
+du: invalid option -- 'R'
+du: invalid option -- 'f'
+du: eQWyw: No such file or directory
+du: invalid option -- 'F'
+du: xFiduSIGlLbpGulXyqA: No such file or directory
+du: invalid option -- 'q'
+du: invalid option -- 'C'
+du: invalid option -- 'V'
+du: invalid option -- '4'
+du: invalid option -- 'o'
+du: invalid option -- 'R'
+du: invalid option -- 'G'
+du: invalid option -- '-'
+du: invalid -t argument 'tGc8A93BVw'
+```
+
 ## find
 
 ```
@@ -44,8 +78,23 @@ when input items might contain white space, quote marks, or backslashes.  The  G
 find -print0 option produces input suitable for this mode.
 ```
 
-## examples
+## Examples
 
+So for the above errors, using following command check size for the directores:
+```
+find ./ -type d -print0 | xargs -0 du -s | sort -nk1
+```
+
+Then we can get the result without errors:
+```
+22790848	./TTW3kNrZQd-BETbHymRqjQ
+24080308	./ENSiFN9NQe-bv3YH71xG9g
+33621480	./J50jz5dFS_m6DsiVRBAEMA
+35486820	./618IZDqDTnee_WoAynubXg
+1202871344	./
+```
+
+More examples:
 ```
 ➜  ~ ls -rthl *.test
 -rw-r--r-- 1 root root 0 Feb 20 18:21 file1.test
