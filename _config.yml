@@ -6,14 +6,14 @@
 title: Davidlu's Blog
 subtitle: "DevOps / SRE"
 description: "Technology enthusiast"
-keywords: "DevOps, SRE, Python, Big Data, AWS, CNCF"
+keywords: "DevOps, SRE, Python, Big Data, Cloud, AWS, CNCF"
 author: David Lu
 language: en
 timezone: ""
 
 # URL
 ## If your site is put in a subdirectory, set url as 'http://yoursite.com/child' and root as '/child/'
-url: http://davidlu1001.github.com
+url: http://davidlu1001.github.io
 root: /
 permalink: :year/:month/:day/:title/
 #permalink: archives/:abbrlink.html
