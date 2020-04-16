@@ -6,7 +6,7 @@ tags:
 categories:
   - SRE
 abbrlink: 712b4da2
-date: 2020-04-16 20:35:46
+date: 2019-11-22 20:35:46
 ---
 
 Just making some notes for the upgrade steps for Zookeeper as a memo.
