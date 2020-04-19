@@ -246,8 +246,8 @@ post_meta:
   item_text: true
   created_at: true
   updated_at:
-    enable: true
-    another_day: true
+    enable: false
+    another_day: false
   categories: true
 
 # Post wordcount display settings
@@ -258,7 +258,7 @@ symbols_count_time:
   item_text_total: false
 
 # Use icon instead of the symbol # to indicate the tag at the bottom of the post
-tag_icon: false
+tag_icon: true
 
 # Reward (Donate)
 # Front-matter variable (unsupport animation).
@@ -266,7 +266,7 @@ reward_settings:
   # If true, reward will be displayed in every article by default.
   enable: true
   animation: false
-  #comment: Donate comment here.
+  #comment: Buy me a coffee
 
 reward:
   wechatpay: /images/wechatpay.png
@@ -358,7 +358,7 @@ codeblock:
   # Code Highlight theme
   # Available values: normal | night | night eighties | night blue | night bright | solarized | solarized dark | galactic
   # See: https://github.com/chriskempson/tomorrow-theme
-  highlight_theme: normal
+  highlight_theme: night eighties
   # Add copy button on codeblock
   copy_button:
     enable: true
@@ -665,6 +665,7 @@ rating:
 
 # AddThis Share. See: https://www.addthis.com
 # Go to https://www.addthis.com/dashboard to customize your tools.
+#add_this_id: ra-5e98cac6af657bff
 add_this_id:
 
 # ---------------------------------------------------------------
