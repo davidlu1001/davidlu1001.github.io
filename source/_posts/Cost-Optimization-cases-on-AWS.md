@@ -4,6 +4,9 @@ tags:
   - Cost Optimization
   - AWS
   - SRE
+  - ElasticSearch
+  - Backup
+  - Terraform
 categories:
   - - SRE
   - - AWS
@@ -11,7 +14,7 @@ abbrlink: 79eee546
 date: 2020-04-20 21:08:44
 ---
 
-Rather than write a big, manual-style cost optimization guide, I'd like to share a few pits I've encountered during the whole process. 
+Rather than write a big, manual-style cost optimization guide, I'd like to share a few pits I've encountered during the process. 
 
 # Tools
 
@@ -21,7 +24,7 @@ Common tools for AWS cost optimization are as follows:
 2. Cost Reports in S3
 3. AWS Trusted Advisor - Cost Optimization
 
-# Strategy
+# Strategies
 
 Based on `AWS Cost Optimization Best Practice`, the main measures are probably the following aspects:
 
