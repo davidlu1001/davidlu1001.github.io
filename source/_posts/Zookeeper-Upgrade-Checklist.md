@@ -4,7 +4,8 @@ tags:
   - Zookeeper
   - SRE
 categories:
-  - SRE
+  - [SRE]
+  - [ZooKeeper]
 abbrlink: 712b4da2
 date: 2019-11-22 20:35:46
 ---

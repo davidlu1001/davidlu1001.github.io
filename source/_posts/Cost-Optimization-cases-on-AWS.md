@@ -10,6 +10,7 @@ tags:
 categories:
   - - SRE
   - - AWS
+  - [Cost]
 abbrlink: 79eee546
 date: 2020-04-20 21:08:44
 ---

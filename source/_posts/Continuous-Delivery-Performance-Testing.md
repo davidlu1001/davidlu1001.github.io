@@ -5,7 +5,9 @@ tags:
   - Performance Testing
   - CI / CD
 categories:
-  - DevOps
+  - [DevOps]
+  - [Performance]
+  - [Testing]
 abbrlink: eadb2e78
 date: 2020-04-13 22:08:58
 ---

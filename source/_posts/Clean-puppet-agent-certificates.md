@@ -3,7 +3,9 @@ title: Clean puppet agent certificates
 tags:
   - DevOps
   - Puppet
-categories: DevOps
+categories: 
+  - [DevOps]
+  - [Puppet]
 abbrlink: dda5d6cb
 date: 2018-03-08 23:42:16
 ---

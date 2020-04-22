@@ -7,6 +7,7 @@ tags:
 categories:
   - - SRE
   - - AWS
+  - [ElasticSearch]
 abbrlink: fdd4d29b
 date: 2019-11-12 21:07:58
 ---

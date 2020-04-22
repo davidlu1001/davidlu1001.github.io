@@ -8,6 +8,7 @@ tags:
 categories: 
   - [SRE]
   - [AWS]
+  - [DB]
 abbrlink: ee94cd4e
 date: 2020-03-13 23:20:12
 ---

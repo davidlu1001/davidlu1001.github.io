@@ -3,7 +3,9 @@ title: Move Terraform resources between remote states
 tags: 
   - Terraform
   - SRE
-categories: SRE
+categories:
+  - [SRE]
+  - [Terraform]
 abbrlink: '40578613'
 date: 2019-04-28 23:06:24
 ---

@@ -5,7 +5,8 @@ tags:
   - Rally
   - SRE
 categories:
-  - SRE
+  - [SRE]
+  - [ElasticSearch]
 abbrlink: ebcc5808
 date: 2020-01-23 22:34:41
 ---

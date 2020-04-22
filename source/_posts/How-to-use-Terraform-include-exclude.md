@@ -8,6 +8,7 @@ tags:
 categories:
   - - SRE
   - - DevOps
+  - [Terraform]
 abbrlink: 3cbb6765
 date: 2019-08-13 21:59:05
 ---

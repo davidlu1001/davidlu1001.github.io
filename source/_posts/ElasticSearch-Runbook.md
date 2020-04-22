@@ -4,7 +4,8 @@ tags:
   - ElasticSearch
   - SRE
 categories:
-  - SRE
+  - [SRE]
+  - [ElasticSearch]
 abbrlink: a1a5b7b2
 date: 2020-04-16 10:07:57
 ---

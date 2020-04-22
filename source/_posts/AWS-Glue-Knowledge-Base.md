@@ -8,6 +8,8 @@ tags:
 categories:
   - [AWS]
   - [SRE]
+  - [Glue]
+  - [ElasticSearch]
 abbrlink: 56cc7bd6
 date: 2018-08-20 23:41:58
 ---
