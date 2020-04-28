@@ -59,6 +59,8 @@ The big selling point for Compute Savings Plans is that the discounts are automa
 
 - Every hour, AWS will assess the possible discount programs that usage qualifies for, and will apply them in the following order: Standard Reservation, Convertible Reservation, Savings Plan.
 
+So as the minimum commitment is `$0.001` per hour. This means only have to spend $8.76 per year ($0.001 x 24 hours x 365 days) in order to qualify for a discount - which might be safer? And if that works as we expected then can add another savings plans on top of it.
+
 # FAQ
 > **Can I continue to purchase EC2 RIs?**
 > 
