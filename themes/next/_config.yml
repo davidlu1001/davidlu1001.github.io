@@ -183,7 +183,6 @@ social:
   GitHub: https://github.com/davidlu1001 || github
   Twitter: https://twitter.com/davidlu1001 || twitter
   E-Mail: mailto:davidlu1001@gmail.com || envelope
-  #Zhihu: https://www.zhihu.com/people/davidlu || iconfont icon-zhihu-circle-fill
   #Weibo: https://weibo.com/yourname || weibo
   #Google: https://plus.google.com/yourname || google
   #FB Page: https://www.facebook.com/yourname || facebook
@@ -572,7 +571,7 @@ comments:
   style: tabs
   # Choose a comment system to be displayed by default.
   # Available values: changyan | disqus | disqusjs | gitalk | livere | valine
-  active:
+  active: disqus
   # Setting `true` means remembering the comment system selected by the visitor.
   storage: true
   # Lazyload all comment systems.
@@ -582,13 +581,13 @@ comments:
     #disqus:
     #  text: Load Disqus
     #  order: -1
-    gitalk:
-      order: -2
+    #gitalk:
+    #  order: -2
 
 # Disqus
 disqus:
-  enable: false
-  shortname: davidlu
+  enable: true
+  shortname: davidlu1001
   count: true
   #post_meta_order: 0
 
