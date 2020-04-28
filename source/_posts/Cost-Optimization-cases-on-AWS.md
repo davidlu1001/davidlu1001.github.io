@@ -1,5 +1,5 @@
 ---
-title: Cost Optimization cases on AWS
+title: Real-life AWS infrastructure Cost Optimization cases
 tags:
   - Cost Optimization
   - AWS
