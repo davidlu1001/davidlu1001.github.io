@@ -45,6 +45,10 @@ Commit to and pay for these in the same way as EC2 Instance Savings Plans, but c
 
 The big selling point for Compute Savings Plans is that the discounts are automatically applied to EC2 instances of any family, size, AZ, region, OS or tenancy, and also apply to Fargate and Lambda usage.
 
+A diagram says more than a thousand words.
+
+![](https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/1Zwfom.jpg)
+
 # How it works
 ![](https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/GhwBkA.jpg)
 
@@ -80,6 +84,8 @@ So we can choose:
 
 # References
 - [AWS - New Savings Plans for AWS compute services](https://aws.amazon.com/blogs/aws/new-savings-plans-for-aws-compute-services/)
+
+- [AWS Savings Plans - Pricing](https://aws.amazon.com/savingsplans/pricing/)
 
 - [AWS Savings Plans - FAQ](https://aws.amazon.com/savingsplans/faq/)
 
