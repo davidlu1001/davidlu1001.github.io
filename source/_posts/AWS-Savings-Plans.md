@@ -17,17 +17,17 @@ date: 2020-04-28 19:57:35
 # What are AWS Savings Plans
 AWS Savings Plans is launched in November 2019, and allows customers to save up to 72% on Amazon EC2 / AWS Fargate in exchange for making a commitment (on how much they will spend per hour) to a consistent amount of compute usage for a 1 or 3-year term. 
 
-Customers can choose how much they wish to commit to (minimum $0.001 per hour per year) and layer Savings Plans on top of one another.
+Customers can choose how much they wish to commit to (minimum `$0.001` per hour) and layer Savings Plans on top of one another.
 
 The major difference between Reserved Instances and AWS Savings Plans are that, rather than committing to a specific instance type in return for a discount, you are committing to a specific spend per hour.
 
-> It’s important to note that at this time, AWS doesn’t allow customers to change their Savings Plans contract once purchased or sell unused discounts in the AWS Marketplace. Once customers commit to a Savings Plan price, they are locked in for the one or three years they committed to. 
+> ***It’s important to note that at this time, AWS doesn’t allow customers to change their Savings Plans contract once purchased or sell unused discounts in the AWS Marketplace. Once customers commit to a Savings Plan price, they are locked in for the one or three years they committed to.*** 
 
 There are two types of AWS Savings Plans:
 
-- EC2 Instance Saving Plans: like Standard RIs
+- **EC2 Instance Saving Plans**: like Standard RIs
 
-- Compute Savings Plans: shares attributes with Convertible RIs with the added bonus that discounts can be applied to the Fargate container service.
+- **Compute Savings Plans**: shares attributes with Convertible RIs with the added bonus that discounts can be applied to the Fargate container service.
 
 These two types provide the choice between maximising financial benefit and sacrificing flexibility or maximising flexibility while benefiting from a smaller discount. 
 
@@ -36,14 +36,14 @@ Here’s a quick comparison of the two types:
 ![](https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/Gx8Hj0.png)
 
 ## EC2 Instance Savings Plans
-The main differences between EC2 Instance Saving Plans and Standard RIs is that Savings Plan discounts are applied automatically to any EC2 instance (within the same family and region) regardless of the operating system or tenancy.
+The main differences between EC2 Instance Saving Plans and Standard RIs is that Savings Plan discounts are applied automatically to any EC2 instance (within the same Family and Region) regardless of the Operating System or Tenancy.
 
 At this stage it’s important to note AWS Savings Plans cannot yet be applied to RDS instances, AWS Redshift, or ElastiCache services. Customers using these services will have to continue using Reserved Instances.
 
 ## Compute Savings Plans
 Commit to and pay for these in the same way as EC2 Instance Savings Plans, but can only get discounts equal to those offered by Convertible Reserved Instances.
 
-The big selling point for Compute Savings Plans is that the discounts are automatically applied to EC2 instances of any family, size, AZ, region, OS or tenancy, and also apply to Fargate and Lambda usage.
+The big selling point for Compute Savings Plans is that the discounts are automatically applied to EC2 instances of any **Family**, Size, **AZ**, **Region**, OS or Tenancy, and also apply to Fargate and Lambda usage.
 
 A diagram says more than a thousand words.
 
