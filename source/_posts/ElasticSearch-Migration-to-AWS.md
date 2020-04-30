@@ -265,7 +265,7 @@ get ECS task parameter settings and set ES endpoint to AWS managed ES for applic
 - Rollback to old ELB in CNAME if errors
 - Data Integration Check
 
-Will generate doc_count comparasion like this for old / new ES:
+Will generate `doc_count` diff result for old / new ES (take index `.marvel-*` for example):
 
 ```
 #index  old_doc_count   new_doc_count   diff_rate
@@ -284,6 +284,7 @@ sys 0m0.121s
 ```
 
 ## Tidy up resources in Puppet / Terraform
+The last step is that clean up old resources in Puppet or Terraform (e.g. EC2 / SG / Route53 etc.)
 
 # Reference
 [knowledge-center/elasticsearch-indexing-performance](https://aws.amazon.com/premiumsupport/knowledge-center/elasticsearch-indexing-performance/)
