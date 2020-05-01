@@ -15,6 +15,18 @@ abbrlink: 79eee546
 date: 2020-04-20 21:08:44
 ---
 
+***Updated on 01/May/2020***
+
+There are other two areas where it is possible to reduce the AWS cost:
+
+1. Considering migrate from Classic Load Balancer to Application Load Balancer (technical debt):
+     - `ALB` is about `10%` cheaper than `ELB` ([AWS Load Balancing pricing](https://aws.amazon.com/elasticloadbalancing/pricing/))
+     - Convenient to perform Canary Depoyments in CI / CD
+
+2. Using AWS Savings Plans: please refer to my article about [AWS Savings Plans Overview](https://davidlu1001.github.io/2020/04/28/AWS-Savings-Plans/)
+
+---
+
 Rather than write a big, manual-style cost optimization guide, I'd like to share a few pits I've encountered during the process. 
 
 # Tools
