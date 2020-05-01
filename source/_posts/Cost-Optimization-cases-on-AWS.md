@@ -231,6 +231,8 @@ Currently the company's default setting of `backup_retention_period` for RDS is`
 
 The effect is as follows, better than nothing:
 
+Can see a `70%` drop for `USW2-Aurora:BackupUsage` after reducing retention period
+
 ![](https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/08_cost_rds.png)
 
 ## About Data Transfer
