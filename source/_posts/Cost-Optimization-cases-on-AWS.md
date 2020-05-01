@@ -307,3 +307,7 @@ Therefore, we really need to pay more attention to cost optimization, not only f
 - [Cost Optimization-AWS Well-Architected Framework](https://wa.aws.amazon.com/wat.pillar.costOptimization.en.html)
 
 - [AWS Backup: working-with-other-services](https://docs.aws.amazon.com/aws-backup/latest/devguide/working-with-other-services.html)
+
+- [AWS Load Balancing pricing](https://aws.amazon.com/elasticloadbalancing/pricing/)
+
+- [AWS Savings Plans - Overview](https://davidlu1001.github.io/2020/04/28/AWS-Savings-Plans/)
