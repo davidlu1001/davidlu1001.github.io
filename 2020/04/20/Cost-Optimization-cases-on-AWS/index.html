@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="google-site-verification" content="AIn6RYiH7oyvpWJuW_neCErD4pn7Iy9IcaCwwDr7wJg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"davidlu1001.github.io","root":"/","scheme":"Pisces","version":"7.7.2","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="Updated on 01&#x2F;May&#x2F;2020 There are other two areas where it is possible to reduce the AWS cost:  Considering migrate from Classic Load Balancer to Application Load Balancer (technical debt):  ALB is abo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Real-life AWS infrastructure Cost Optimization cases">
+<meta property="og:url" content="http://davidlu1001.github.io/2020/04/20/Cost-Optimization-cases-on-AWS/index.html">
+<meta property="og:site_name" content="Davidlu&#39;s Blog">
+<meta property="og:description" content="Updated on 01&#x2F;May&#x2F;2020 There are other two areas where it is possible to reduce the AWS cost:  Considering migrate from Classic Load Balancer to Application Load Balancer (technical debt):  ALB is abo">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/02_ebs_cost.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/03_aws_what_new.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/04_aws_backup_ami.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/05_aws_backup_ebs.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/06_cost_ebs_after.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/07_monitor%20plugin.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/08_cost_rds.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/09_cost_datatransfer.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/10_ce_locate_dt.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/11_dt_cost.png">
+<meta property="article:published_time" content="2020-04-20T09:08:44.000Z">
+<meta property="article:modified_time" content="2020-12-11T09:52:39.131Z">
+<meta property="article:author" content="David Lu">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="ElasticSearch">
+<meta property="article:tag" content="SRE">
+<meta property="article:tag" content="Cost Optimization">
+<meta property="article:tag" content="Backup">
+<meta property="article:tag" content="Terraform">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/02_ebs_cost.png">
+
+<link rel="canonical" href="http://davidlu1001.github.io/2020/04/20/Cost-Optimization-cases-on-AWS/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true
+  };
+</script>
+
+  <title>Real-life AWS infrastructure Cost Optimization cases | Davidlu's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-62146539-2"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-62146539-2');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Davidlu's Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Davidlu's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+      
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">17</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://davidlu1001.github.io/2020/04/20/Cost-Optimization-cases-on-AWS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="David Lu">
+      <meta itemprop="description" content="Technology enthusiast">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Davidlu's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          Real-life AWS infrastructure Cost Optimization cases
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-04-20 21:08:44" itemprop="dateCreated datePublished" datetime="2020-04-20T21:08:44+12:00">2020-04-20</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SRE/" itemprop="url" rel="index"><span itemprop="name">SRE</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Cost/" itemprop="url" rel="index"><span itemprop="name">Cost</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/2020/04/20/Cost-Optimization-cases-on-AWS/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/04/20/Cost-Optimization-cases-on-AWS/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>11k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>10 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p><strong><em>Updated on 01/May/2020</em></strong></p>
+<p>There are other two areas where it is possible to reduce the AWS cost:</p>
+<ol>
+<li><p>Considering migrate from Classic Load Balancer to Application Load Balancer (technical debt):</p>
+<ul>
+<li><code>ALB</code> is about <code>10%</code> cheaper than <code>ELB</code> (<span class="exturl" data-url="aHR0cHM6Ly9hd3MuYW1hem9uLmNvbS9lbGFzdGljbG9hZGJhbGFuY2luZy9wcmljaW5nLw==" title="https://aws.amazon.com/elasticloadbalancing/pricing/">AWS Load Balancing pricing<i class="fa fa-external-link"></i></span>)</li>
+<li>Convenient to perform Canary Depoyments in CI / CD</li>
+</ul>
+</li>
+<li><p>Using AWS Savings Plans: please refer to my article about <a href="https://davidlu1001.github.io/2020/04/28/AWS-Savings-Plans/">AWS Savings Plans Overview</a></p>
+</li>
+</ol>
+<hr>
+<p>Rather than write a big, manual-style cost optimization guide, I’d like to share a few pits I’ve encountered during the process. </p>
+<h1 id="Tools"><a href="#Tools" class="headerlink" title="Tools"></a>Tools</h1><p>Common tools for AWS cost optimization are as follows:</p>
+<ol>
+<li>AWS Cost Explorer</li>
+<li>Cost Reports in S3</li>
+<li>AWS Trusted Advisor - Cost Optimization</li>
+</ol>
+<h1 id="Strategies"><a href="#Strategies" class="headerlink" title="Strategies"></a>Strategies</h1><p>Based on <code>AWS Cost Optimization Best Practice</code>, the main measures are probably the following aspects:</p>
+<ol>
+<li><strong>Right Sizing</strong>: Use a more appropriate (convenient) Instance Type / Family (for EC2 / RDS) </li>
+<li><strong>Price models</strong>: leverage Reserved Instances (RI) and Spot Instances (SI)</li>
+<li><strong>Delete / Stop unused resources</strong>: e.g. EBS Volume / Snapshot, EC2 / RDS / EIP / ELB, etc.</li>
+<li><strong>Storage Tier / Backup Policy</strong>: Move cold data to cheaper storage tiers like Glacier; Review EBS Snapshot / RDS backup policy</li>
+<li><strong>Right Tagging</strong>: Enforce allocation tagging, while improving Tag coverage and accuracy</li>
+<li><strong>Scheduling On / Off times</strong>: Review existing Auto Scaling policies; Stop instances used in Dev and Prod when not in use and start them again when needed</li>
+</ol>
+<p>Corresponding to the specific situation of the company, mainly want to talk about 3 and 4 mentioned above.</p>
+<h1 id="About-Backup"><a href="#About-Backup" class="headerlink" title="About Backup"></a>About Backup</h1><h2 id="AWS-Backup"><a href="#AWS-Backup" class="headerlink" title="AWS Backup"></a>AWS Backup</h2><p>At first, the company used Lambda Function (Python script) to handle EBS / RDS backup. Later, because of the release of AWS Backup Service, it was decided to migrate backup management to AWS Backup.</p>
+<p>However, for Database backup, because AWS Backup Service does not support <code>Aurora</code>, so we still need to keep the original Lambda.</p>
+<blockquote>
+<p>AWS Backup currently supports all Amazon RDS database engines except Amazon Aurora.</p>
+</blockquote>
+<p>For AWS Backup, it can support multiple AWS Services / Resources, such as:</p>
+<ul>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL2Vmcy9sYXRlc3QvdWcvYXdzYmFja3VwLmh0bWw=" title="https://docs.aws.amazon.com/efs/latest/ug/awsbackup.html">Amazon EFS<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL2FtYXpvbmR5bmFtb2RiL2xhdGVzdC9kZXZlbG9wZXJndWlkZS9CYWNrdXBSZXN0b3JlLmh0bWw=" title="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/BackupRestore.html">DynamoDB<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL0FXU0VDMi9sYXRlc3QvVXNlckd1aWRlL0VCU1NuYXBzaG90cy5odG1s" title="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/EBSSnapshots.html">Amazon EBS Snapshots<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL0FtYXpvblJEUy9sYXRlc3QvVXNlckd1aWRlL0NIQVBfQ29tbW9uVGFza3MuQmFja3VwUmVzdG9yZS5odG1s" title="https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_CommonTasks.BackupRestore.html">Amazon RDS DB Instances<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL3N0b3JhZ2VnYXRld2F5L2xhdGVzdC91c2VyZ3VpZGUvYmFja2luZy11cC12b2x1bWVzLmh0bWwjYmFja3VwLXZvbHVtZXMtY3J5bw==" title="https://docs.aws.amazon.com/storagegateway/latest/userguide/backing-up-volumes.html#backup-volumes-cryo">AWS Storage Gateway<i class="fa fa-external-link"></i></span></p>
+</li>
+</ul>
+<p>Unfortunately, AWS Backup does not support the <code>Wildcard (*)</code> to match resources.</p>
+<p>For example:</p>
+<p>Internally we use <code>Terraform</code> as IaC (<span class="exturl" data-url="aHR0cHM6Ly9lbi53aWtpcGVkaWEub3JnL3dpa2kvSW5mcmFzdHJ1Y3R1cmVfYXNfY29kZQ==" title="https://en.wikipedia.org/wiki/Infrastructure_as_code">Infrastructure as code<i class="fa fa-external-link"></i></span>) to automate the management of resources on AWS.</p>
+<p>Examples of corresponding AWS Backup codes:</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line">  <span class="attr">resources</span>                       = [</span><br><span class="line">    <span class="comment"># RDS</span></span><br><span class="line">    <span class="string">&quot;arn:aws:rds:<span class="subst">$&#123;data.aws_region.current.name&#125;</span>:<span class="subst">$&#123;data.aws_caller_identity.current.account_id&#125;</span>:db:redash&quot;</span>,</span><br><span class="line">    <span class="comment"># DynamoDB</span></span><br><span class="line">    <span class="string">&quot;arn:aws:dynamodb:<span class="subst">$&#123;data.aws_region.current.name&#125;</span>:<span class="subst">$&#123;data.aws_caller_identity.current.account_id&#125;</span>:table/crm&quot;</span>,</span><br><span class="line">    <span class="comment"># EBS</span></span><br><span class="line">    <span class="string">&quot;arn:aws:ec2:<span class="subst">$&#123;data.aws_region.current.name&#125;</span>:<span class="subst">$&#123;data.aws_caller_identity.current.account_id&#125;</span>:volume/</span></span><br><span class="line"><span class="string">vol-054cfe133afc1dc10&quot;</span>,</span><br><span class="line">    <span class="comment"># EFS</span></span><br><span class="line">    <span class="string">&quot;arn:aws:elasticfilesystem:<span class="subst">$&#123;data.aws_region.current.name&#125;</span>:<span class="subst">$&#123;data.aws_caller_identity.current.account_id&#125;</span>:file-system/<span class="subst">$&#123;filesystem-id&#125;</span>&quot;</span>,</span><br><span class="line">    <span class="comment"># StorageGateway</span></span><br><span class="line">    <span class="string">&quot;arn:aws:storagegateway:<span class="subst">$&#123;data.aws_region.current.name&#125;</span>:<span class="subst">$&#123;data.aws_caller_identity.current.account_id&#125;</span>:gateway/<span class="subst">$&#123;gateway-id&#125;</span>/volume/<span class="subst">$&#123;volume-id&#125;</span>&quot;</span>,</span><br><span class="line">  ]</span><br><span class="line"></span><br><span class="line">  <span class="attr">tags</span> = [</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">type</span>  = <span class="string">&quot;STRINGEQUALS&quot;</span></span><br><span class="line">    <span class="attr">key</span>   = <span class="string">&quot;Environment&quot;</span></span><br><span class="line">    <span class="attr">value</span> = <span class="string">&quot;Production&quot;</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">type</span>  = <span class="string">&quot;STRINGEQUALS&quot;</span></span><br><span class="line">    <span class="attr">key</span>   = <span class="string">&quot;Cost Center&quot;</span></span><br><span class="line">    <span class="attr">value</span> = <span class="string">&quot;Platform&quot;</span></span><br><span class="line">  &#125;,</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="attr">type</span>  = <span class="string">&quot;STRINGEQUALS&quot;</span></span><br><span class="line">    <span class="attr">key</span>   = <span class="string">&quot;MakeSnapshot&quot;</span></span><br><span class="line">    <span class="attr">value</span> = <span class="string">&quot;True&quot;</span></span><br><span class="line">  &#125;,</span><br><span class="line">  ]</span><br></pre></td></tr></table></figure>
+
+<p>Therefore, the corresponding Backup solution is:</p>
+<ul>
+<li><p>Either specify the specific <code>Resource ID</code> (use <code>resources</code> to specify, but cannot support something like <code>arn:aws:rds:$&#123;region&#125;:$&#123;account_id&#125;:db:*</code>)</p>
+</li>
+<li><p>Either use <code>Tags</code> to mark the resources to be backed up by AWS Backup Service</p>
+</li>
+</ul>
+<p>Of course, the former is certainly not realistic, which means:</p>
+<p><strong><em>The feature of AWS Backup determins (well, I believe this is not a bug), in fact you can only use <code>Tags</code>, and need to set <code>Resources</code> to empty <code>[]</code> (by default it’s for all Resource types supported by AWS Backup). Thus laying a hidden danger.</em></strong></p>
+<blockquote>
+<p>Note: The relationship between <code>Tags</code> is <code>OR</code>, so as long as  one <code>Tag</code> get matched, AWS Backup will back it up.</p>
+</blockquote>
+<p>The foreplay is over, and the pit is coming!</p>
+<p>At the beginning of March, it was found that the AWS bill was obviously abnormal. After analysis, it was found that the cost of EBS snapshots increased too fast.</p>
+<p><img src="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/02_ebs_cost.png" alt=""></p>
+<p>As you can see in the chart, it started to grow slowly from around <code>January 15th</code>, so what happened at this time?</p>
+<p>The internal search was fruitless. After googling, I found a suspicious <span class="exturl" data-url="aHR0cHM6Ly9hd3MuYW1hem9uLmNvbS9hYm91dC1hd3Mvd2hhdHMtbmV3LzIwMjAvMDEvYXdzLWJhY2t1cC1hZGRzLXN1cHBvcnQtYW1hem9uLWVsYXN0aWMtY2xvdWQtY29tcHV0ZS1pbnN0YW5jZS1iYWNrdXAv" title="https://aws.amazon.com/about-aws/whats-new/2020/01/aws-backup-adds-support-amazon-elastic-cloud-compute-instance-backup/">What’s New<i class="fa fa-external-link"></i></span> message from AWS official website.</p>
+<p>Hmmmmmm, perfectly matched…</p>
+<p><img src="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/03_aws_what_new.png" alt=""></p>
+<p>Okay! Looks like AWS help me to back up all the EC2 instances by default… Thank you!</p>
+<p>According to the documentation, for AWS Backup, in addition to EBS Snapshot itself, it will also make an AMI copy for each EC2 instance, so that’s why there are a lot of AMIs.</p>
+<blockquote>
+<p>When backing up an Amazon EC2 instance, AWS Backup takes a snapshot of the root Amazon EBS storage volume, the launch configurations, and all associated EBS volumes. AWS Backup stores certain configuration parameters of the EC2 instance, including instance type, security groups, Amazon VPC, monitoring configuration, and tags. The backup data is stored as an Amazon EBS volume-backed AMI (Amazon Machine Image).</p>
+</blockquote>
+<p><img src="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/04_aws_backup_ami.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/05_aws_backup_ebs.png" alt=""></p>
+<p>According to the previous AWS Backup execution logic, for all supported types (including newly supported EC2 on January 13), as long as the tag is matched, the backup will be performed.</p>
+<p>So, for EC2 AMI / EBS snapshot, how Tags are added by default?</p>
+<p>Checked the <code>Terraform</code> code:</p>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">resource <span class="string">&quot;aws_autoscaling_group&quot;</span> <span class="string">&quot;main&quot;</span> &#123;</span><br><span class="line">...</span><br><span class="line">  <span class="keyword">tag</span> <span class="title">&#123;</span></span><br><span class="line"><span class="title">    key</span>                 = <span class="string">&quot;Name&quot;</span></span><br><span class="line">    value               = <span class="string">&quot;Value&quot;</span></span><br><span class="line">    propagate_at_launch = <span class="literal">true</span></span><br><span class="line">  &#125;</span><br><span class="line">...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>Since <code>propagate_at_launch = true</code> is used, the tags of ASG will be copied when EC2 launches.</p>
+<p>In addition, after EC2 is started, the initialization script will be run through Puppet to copy the ASG / EC2 tags to EBS Volumes. Code example as follows:</p>
+<figure class="highlight dsconfig"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Retrieve the tags attached to the instance if no auto-scaling group exists.</span></span><br><span class="line"><span class="comment"># Add all tags retrieved from the auto-scaling group to all EBS volumes attached to the current EC2 instance.</span></span><br><span class="line"></span><br><span class="line"><span class="string">if</span> [ <span class="string">&quot;$asg&quot;</span> != <span class="string">&quot;&quot;</span> ]; <span class="string">then</span></span><br><span class="line"><span class="string"></span>    <span class="string">aws</span> <span class="string">ec2</span> <span class="built_in">create-tags</span> <span class="built_in">--region</span> <span class="string">&quot;$&#123;region_id&#125;&quot;</span> <span class="built_in">--resources</span> $&#123;<span class="string">volumes</span>&#125; <span class="built_in">--tags</span> <span class="string">&quot;$&#123;tags&#125;&quot;</span></span><br><span class="line"><span class="string">else</span></span><br><span class="line"><span class="string"></span>    <span class="string">tags</span>=$(<span class="string">aws</span> <span class="string">ec2</span> <span class="string">describe-tags</span> <span class="built_in">--region</span> <span class="string">&quot;$&#123;region_id&#125;&quot;</span> <span class="built_in">--filters</span> <span class="string">&quot;Name=resource-id,Values=&quot;</span>$&#123;<span class="string">instance_id</span>&#125;<span class="string">&quot;&quot;</span> <span class="built_in">--query</span> <span class="string">&#x27;Tags[*].&#123;Key:Key,Value:Value&#125;&#x27;</span>)</span><br><span class="line">    <span class="string">aws</span> <span class="string">ec2</span> <span class="built_in">create-tags</span> <span class="built_in">--region</span> <span class="string">&quot;$&#123;region_id&#125;&quot;</span> <span class="built_in">--resources</span> $&#123;<span class="string">volumes</span>&#125; <span class="built_in">--tags</span> <span class="string">&quot;$&#123;tags&#125;&quot;</span></span><br><span class="line"><span class="string">fi</span></span><br></pre></td></tr></table></figure>
+
+<p>So the current Tags replication chain:</p>
+<blockquote>
+<p>ASG-&gt; EC2-&gt; EBS Volume</p>
+</blockquote>
+<p>As for the solution, just to differentiate <code>Tags</code> between EC2 and EBS, and delete the tags that will be matched by AWS Backup (here is <code>MakeSnapshot*</code>), to achieve the purpose of “Backing up EBS only, not EC2 instance”:</p>
+<figure class="highlight dsconfig"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">if</span> [ <span class="string">&quot;$asg&quot;</span> != <span class="string">&quot;&quot;</span> ]; <span class="string">then</span></span><br><span class="line"><span class="string"></span>    <span class="string">aws</span> <span class="string">ec2</span> <span class="built_in">create-tags</span> <span class="built_in">--region</span> <span class="string">&quot;$&#123;region_id&#125;&quot;</span> <span class="built_in">--resources</span> $&#123;<span class="string">volumes</span>&#125; <span class="built_in">--tags</span> <span class="string">&quot;$&#123;tags&#125;&quot;</span></span><br><span class="line">    <span class="string">aws</span> <span class="string">ec2</span> <span class="built_in">delete-tags</span> <span class="built_in">--resources</span> <span class="string">&quot;$&#123;instance_id&#125;&quot;</span> <span class="built_in">--tags</span> <span class="string">Key</span>=<span class="string">MakeSnapshot</span> <span class="string">Key</span>=<span class="string">MakeSnapshotShortTerm</span> <span class="string">Key</span>=<span class="string">MakeSnapshotLongTerm</span></span><br><span class="line"><span class="string">else</span></span><br><span class="line"><span class="string"></span>    <span class="string">tags</span>=$(<span class="string">aws</span> <span class="string">ec2</span> <span class="string">describe-tags</span> <span class="built_in">--region</span> <span class="string">&quot;$&#123;region_id&#125;&quot;</span> <span class="built_in">--filters</span> <span class="string">&quot;Name=resource-id,Values=&quot;</span>$&#123;<span class="string">instance_id</span>&#125;<span class="string">&quot;&quot;</span> <span class="built_in">--query</span> <span class="string">&#x27;Tags[*].&#123;Key:Key,Value:Value&#125;&#x27;</span>)</span><br><span class="line">    <span class="string">aws</span> <span class="string">ec2</span> <span class="built_in">create-tags</span> <span class="built_in">--region</span> <span class="string">&quot;$&#123;region_id&#125;&quot;</span> <span class="built_in">--resources</span> $&#123;<span class="string">volumes</span>&#125; <span class="built_in">--tags</span> <span class="string">&quot;$&#123;tags&#125;&quot;</span></span><br><span class="line">    <span class="string">aws</span> <span class="string">ec2</span> <span class="built_in">delete-tags</span> <span class="built_in">--resources</span> <span class="string">&quot;$&#123;instance_id&#125;&quot;</span> <span class="built_in">--tags</span> <span class="string">Key</span>=<span class="string">MakeSnapshot</span> <span class="string">Key</span>=<span class="string">MakeSnapshotShortTerm</span> <span class="string">Key</span>=<span class="string">MakeSnapshotLongTerm</span></span><br><span class="line"><span class="string">fi</span></span><br></pre></td></tr></table></figure>
+
+<p>The effect after cleaning:</p>
+<p><img src="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/06_cost_ebs_after.png" alt=""></p>
+<p>After this battle, I completely felt the fear of being dominated by AWS Bills :-(</p>
+<p>You can’t plant heels in the same place, so just add monitoring for news from AWS :-)</p>
+<p><img src="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/07_monitor%20plugin.png" alt=""></p>
+<h1 id="About-DB-storage"><a href="#About-DB-storage" class="headerlink" title="About DB storage"></a>About DB storage</h1><p><strong>RDS backup storage excess free allocation</strong></p>
+<blockquote>
+<p>Potential increase to your Amazon Aurora bill [AWS Account: XXXXXXXXX]</p>
+<p>Starting March 1, 2020, we will start charging for backup storage in excess of the free allocation. There will not be be any back-dated or retroactive charges for use of Aurora backups before March 1, 2020.</p>
+<p>You can review your current backup retention policy and snapshots on the RDS Management Console. You can lower your monthly bill by reducing your backup retention window or by deleting unnecessary snapshots.</p>
+</blockquote>
+<p>Usually, in our SRE team who is on duty will also pay attention to daily BAU such as consultation / email etc., but on that day, the unlucky guy was too busy to ignore the AWS email when received it, and therefore didn’t create a JIRA ticket, but (the interesting thing is) everyone in the team missed it as well, which is pretty strange.</p>
+<p>As a result, we didn’t realize until reviewing the AWS Cost, and the price is not cheap actually:</p>
+<blockquote>
+<p>$ 0.095 per additional GB-month of backup storage exceeding free allocation</p>
+</blockquote>
+<p>Currently the company’s default setting of <code>backup_retention_period</code> for RDS is<code>30</code> days, and this time, of course, we need to reduce it.</p>
+<p>The effect is as follows, better than nothing:</p>
+<p>Can see a <code>70%</code> drop for <code>USW2-Aurora:BackupUsage</code> after reducing retention period</p>
+<p><img src="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/08_cost_rds.png" alt=""></p>
+<h2 id="About-Data-Transfer"><a href="#About-Data-Transfer" class="headerlink" title="About Data Transfer"></a>About Data Transfer</h2><p>One of the more interesting things during this period is that, I found there is something called <strong><em>EC2-others</em></strong> in the AWS Cost Report. Here is the official statement: </p>
+<blockquote>
+<p>The <a target="_blank" rel="noopener" href="https://aws.amazon.com/blogs/aws-cost-management/tips-and-tricks-for-exploring-your-data-in-aws-cost-explorer-part-2/"><strong>EC2-Other</strong></a> category includes multiple service-related usage types, tracking costs associated:</p>
+<ul>
+<li>Amazon EBS volumes and snapshots</li>
+<li>Elastic IP addresses</li>
+<li>NAT gateways</li>
+<li>Data transfer</li>
+</ul>
+</blockquote>
+<p>Through ithe Billing Report, I found that the following is the culprit:</p>
+<p><img src="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/09_cost_datatransfer.png" alt=""></p>
+<h3 id="How-to-locate"><a href="#How-to-locate" class="headerlink" title="How to locate"></a>How to locate</h3><p>Using <code>Cost Explorer</code>, we can locate the specific item with the following settings:</p>
+<p><img src="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/10_ce_locate_dt.png" alt=""></p>
+<p>Finally, the major part of Data Transfer is located, which comes from a (business) Load Balancer, followed by the Network Load Balancer (NLB) that for Logging.</p>
+<h3 id="How-to-reduce-data-transmission-costs"><a href="#How-to-reduce-data-transmission-costs" class="headerlink" title="How to reduce data transmission costs"></a>How to reduce data transmission costs</h3><p>A picture is worth a thousand words:</p>
+<p><img src="https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/11_dt_cost.png" alt=""></p>
+<p>There’re some general strategies, such as:</p>
+<ul>
+<li><p>Limit data transfer to the same AZ as much as possible, or between AZs or the same Region.</p>
+</li>
+<li><p>Use Private IP whenever possible.</p>
+</li>
+</ul>
+<p>For example:</p>
+<ul>
+<li><p>EC2 that needs to communicate in a development or test environment should be in the same Availability Zone (AZ) to avoid data transfer costs.</p>
+</li>
+<li><p>EC2 can use CloudFront (CDN) if it needs to transfer data such as pictures / videos to Public.</p>
+</li>
+<li><p>For resources in different Regions or multiple Accounts, can use <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL3ZwYy9sYXRlc3QvcGVlcmluZy93aGF0LWlzLXZwYy1wZWVyaW5nLmh0bWw=" title="https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html">VPC Peering<i class="fa fa-external-link"></i></span> or <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL3ZwYy9sYXRlc3QvdXNlcmd1aWRlL3ZwYy1zaGFyaW5nLmh0bWw=" title="https://docs.aws.amazon.com/vpc/latest/userguide/vpc-sharing.html">VPC Sharing<i class="fa fa-external-link"></i></span> to further reduce transfer costs.</p>
+</li>
+</ul>
+<p>In reality, a multi-pronged strategy has been adopted.</p>
+<p>After locating certain LB problems, the method of “directly reducing the transmitted data” was adopted, e.g.: </p>
+<ul>
+<li><p>Turn off <code>log_subrequest</code> config in <code>OpenResty(Nginx)</code></p>
+<blockquote>
+<p>disables logging of subrequests into <span class="exturl" data-url="aHR0cDovL25naW54Lm9yZy9lbi9kb2NzL2h0dHAvbmd4X2h0dHBfbG9nX21vZHVsZS5odG1sI2FjY2Vzc19sb2c=" title="http://nginx.org/en/docs/http/ngx_http_log_module.html#access_log">access_log<i class="fa fa-external-link"></i></span></p>
+</blockquote>
+</li>
+<li><p>Add filter strategy in <code>Logstash</code> to discard some useless data</p>
+</li>
+<li><p>In <code>Rsyslog</code>, enable the compression mode for <span class="exturl" data-url="aHR0cHM6Ly9yc3lzbG9nLnJlYWR0aGVkb2NzLmlvL2VuL2xhdGVzdC9jb25maWd1cmF0aW9uL21vZHVsZXMvb21md2QuaHRtbA==" title="https://rsyslog.readthedocs.io/en/latest/configuration/modules/omfwd.html">omfwd module<i class="fa fa-external-link"></i></span>. Generally, a medium compression level should be fine, for example, <code>ZipLevel</code> can be set to <code>3-5</code>, and <code>compression.mode</code> can be set to <code>single</code>, which means each message will be evaluated and only the larger message will be compressed. And here in order to save costs, a more aggressive strategy is adopted, which will introduce delay but it’s acceptable.</p>
+  <figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">ZipLevel</span> = <span class="string">&quot;9&quot;</span></span><br><span class="line"><span class="attr">compression.mode</span> = <span class="string">&quot;stream: always&quot;</span></span><br><span class="line"><span class="attr">compression.stream.flushOnTXEnd</span> = <span class="string">&quot;off&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>In addition, can also consider adjusting the <code>index.codec</code> configuration of <code>ElasticSearch</code>, using <code>best_compression</code> to replace the default compression algorithm <code>LZ4</code> to achieve a higher compression ratio, in order to reduce data transfer across AZ (such as <code>shard allocation</code>)</p>
+</li>
+</ul>
+<p>Well, for the time being, it is predicted that <code>Cost Optimization</code> will be a protracted battle, especially in the current environment of global economic impact.</p>
+<p>Therefore, we really need to pay more attention to cost optimization, not only from the beginning of architecture / solution design, development and daily maintenance, but also need to create a lean cost-centric culture.</p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly9hd3MuYW1hem9uLmNvbS9hd3MtY29zdC1tYW5hZ2VtZW50Lw==" title="https://aws.amazon.com/aws-cost-management/">AWS Cost Management<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93YS5hd3MuYW1hem9uLmNvbS93YXQucGlsbGFyLmNvc3RPcHRpbWl6YXRpb24uZW4uaHRtbA==" title="https://wa.aws.amazon.com/wat.pillar.costOptimization.en.html">Cost Optimization-AWS Well-Architected Framework<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL2F3cy1iYWNrdXAvbGF0ZXN0L2Rldmd1aWRlL3dvcmtpbmctd2l0aC1vdGhlci1zZXJ2aWNlcy5odG1s" title="https://docs.aws.amazon.com/aws-backup/latest/devguide/working-with-other-services.html">AWS Backup: working-with-other-services<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly9hd3MuYW1hem9uLmNvbS9lbGFzdGljbG9hZGJhbGFuY2luZy9wcmljaW5nLw==" title="https://aws.amazon.com/elasticloadbalancing/pricing/">AWS Load Balancing pricing<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><a href="https://davidlu1001.github.io/2020/04/28/AWS-Savings-Plans/">AWS Savings Plans - Overview</a></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    Donate
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="David Lu WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="David Lu Alipay">
+        <p>Alipay</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>Welcome to my other publishing channels</p>
+
+    <div class="social-list">
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="https://twitter.com/davidlu1001">
+                <span class="icon">
+                  <i class="fa fa-twitter"></i>
+                </span>
+
+                <span class="label">Twitter</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="https://t.me/nztrain">
+                <span class="icon">
+                  <i class="fa fa-telegram"></i>
+                </span>
+
+                <span class="label">Telegram</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+                <span class="icon">
+                  <i class="fa fa-wechat"></i>
+                </span>
+
+                <span class="label">WeChat</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="/atom.xml">
+                <span class="icon">
+                  <i class="fa fa-rss"></i>
+                </span>
+
+                <span class="label">RSS</span>
+              </a>
+            </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/AWS/" rel="tag"><i class="fa fa-tag"></i> AWS</a>
+              <a href="/tags/ElasticSearch/" rel="tag"><i class="fa fa-tag"></i> ElasticSearch</a>
+              <a href="/tags/SRE/" rel="tag"><i class="fa fa-tag"></i> SRE</a>
+              <a href="/tags/Cost-Optimization/" rel="tag"><i class="fa fa-tag"></i> Cost Optimization</a>
+              <a href="/tags/Backup/" rel="tag"><i class="fa fa-tag"></i> Backup</a>
+              <a href="/tags/Terraform/" rel="tag"><i class="fa fa-tag"></i> Terraform</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/16/ElasticSearch-Runbook/" rel="prev" title="ElasticSearch Runbook">
+      <i class="fa fa-chevron-left"></i> ElasticSearch Runbook
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/22/Send-metric-to-StatsD-Datadog/" rel="next" title="Send metric to StatsD (Datadog)">
+      Send metric to StatsD (Datadog) <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Tools"><span class="nav-number">1.</span> <span class="nav-text">Tools</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Strategies"><span class="nav-number">2.</span> <span class="nav-text">Strategies</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#About-Backup"><span class="nav-number">3.</span> <span class="nav-text">About Backup</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AWS-Backup"><span class="nav-number">3.1.</span> <span class="nav-text">AWS Backup</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#About-DB-storage"><span class="nav-number">4.</span> <span class="nav-text">About DB storage</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#About-Data-Transfer"><span class="nav-number">4.1.</span> <span class="nav-text">About Data Transfer</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#How-to-locate"><span class="nav-number">4.1.1.</span> <span class="nav-text">How to locate</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#How-to-reduce-data-transmission-costs"><span class="nav-number">4.1.2.</span> <span class="nav-text">How to reduce data transmission costs</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">5.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">David Lu</p>
+  <div class="site-description" itemprop="description">Technology enthusiast</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;davidlu1001"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly90d2l0dGVyLmNvbS9kYXZpZGx1MTAwMQ==" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;davidlu1001"><i class="fa fa-fw fa-twitter"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOmRhdmlkbHUxMDAxQGdtYWlsLmNvbQ==" title="E-Mail → mailto:davidlu1001@gmail.com"><i class="fa fa-fw fa-envelope"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Lu</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">101k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:32</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://davidlu1001.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://davidlu1001.github.io/2020/04/20/Cost-Optimization-cases-on-AWS/";
+    this.page.identifier = "2020/04/20/Cost-Optimization-cases-on-AWS/";
+    this.page.title = "Real-life AWS infrastructure Cost Optimization cases";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://davidlu1001.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="google-site-verification" content="AIn6RYiH7oyvpWJuW_neCErD4pn7Iy9IcaCwwDr7wJg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"davidlu1001.github.io","root":"/","scheme":"Pisces","version":"7.7.2","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="TL;DR ElasticSearch Backup (snapshot &#x2F; restore) on AWS S3  Steps &#x2F; Configrations for ES snapshot &#x2F; restore  Use elastic curator to manage snapshots (create &#x2F; remove)  Docker image for ES Curator to ma">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElasticSearch backup with AWS S3">
+<meta property="og:url" content="http://davidlu1001.github.io/2020/12/12/ElasticSearch-backup-with-AWS-S3/index.html">
+<meta property="og:site_name" content="Davidlu&#39;s Blog">
+<meta property="og:description" content="TL;DR ElasticSearch Backup (snapshot &#x2F; restore) on AWS S3  Steps &#x2F; Configrations for ES snapshot &#x2F; restore  Use elastic curator to manage snapshots (create &#x2F; remove)  Docker image for ES Curator to ma">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-12-11T11:08:50.000Z">
+<meta property="article:modified_time" content="2020-12-11T12:17:14.135Z">
+<meta property="article:author" content="David Lu">
+<meta property="article:tag" content="ElasticSearch">
+<meta property="article:tag" content="SRE">
+<meta property="article:tag" content="Backup">
+<meta property="article:tag" content="DR">
+<meta property="article:tag" content="S3">
+<meta property="article:tag" content="curator">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://davidlu1001.github.io/2020/12/12/ElasticSearch-backup-with-AWS-S3/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true
+  };
+</script>
+
+  <title>ElasticSearch backup with AWS S3 | Davidlu's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-62146539-2"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-62146539-2');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Davidlu's Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Davidlu's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+      
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">17</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://davidlu1001.github.io/2020/12/12/ElasticSearch-backup-with-AWS-S3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="David Lu">
+      <meta itemprop="description" content="Technology enthusiast">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Davidlu's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          ElasticSearch backup with AWS S3
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-12-12 00:08:50" itemprop="dateCreated datePublished" datetime="2020-12-12T00:08:50+13:00">2020-12-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SRE/" itemprop="url" rel="index"><span itemprop="name">SRE</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ElasticSearch/" itemprop="url" rel="index"><span itemprop="name">ElasticSearch</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Curator/" itemprop="url" rel="index"><span itemprop="name">Curator</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/2020/12/12/ElasticSearch-backup-with-AWS-S3/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/12/12/ElasticSearch-backup-with-AWS-S3/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>15k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>14 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="TL-DR"><a href="#TL-DR" class="headerlink" title="TL;DR"></a>TL;DR</h1><ul>
+<li><p>ElasticSearch Backup (snapshot / restore) on AWS S3</p>
+</li>
+<li><p>Steps / Configrations for ES snapshot / restore</p>
+</li>
+<li><p>Use elastic <code>curator</code> to manage snapshots (create / remove)</p>
+</li>
+<li><p>Docker image for ES Curator to manage Elasticsearch snapshots - <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAxL2RvY2tlci1jdXJhdG9y" title="https://github.com/davidlu1001/docker-curator">davidlu1001/docker-curator<i class="fa fa-external-link"></i></span></p>
+</li>
+</ul>
+<h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>The purpose of this blog is to investigate the possible solutions to backup and restore ES indices. So that in the event of a failure, the cluster data can be quickly restored and minimized the business impact.</p>
+<h2 id="Backup-content"><a href="#Backup-content" class="headerlink" title="Backup content"></a>Backup content</h2><p>Generally the backup content would include:</p>
+<ul>
+<li><p>Cluster data</p>
+</li>
+<li><p>State configuration: includes cluster / index / shard settings</p>
+</li>
+</ul>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># index settings</span></span><br><span class="line"><span class="built_in">curl</span> <span class="literal">-X</span> GET <span class="string">&quot;localhost:9200/_all/_settings?pretty&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># cluster settings</span></span><br><span class="line"><span class="built_in">curl</span> <span class="literal">-s</span> <span class="literal">-XGET</span> <span class="string">&quot;http://localhost:9200/_cluster/settings?pretty&amp;flat_settings&amp;filter_path=persistent&quot;</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;persistent&quot;</span> : &#123;</span><br><span class="line">    <span class="string">&quot;cluster.routing.allocation.cluster_concurrent_rebalance&quot;</span> : <span class="string">&quot;12&quot;</span>,</span><br><span class="line">    <span class="string">&quot;cluster.routing.allocation.node_concurrent_recoveries&quot;</span> : <span class="string">&quot;6&quot;</span>,</span><br><span class="line">    <span class="string">&quot;indices.recovery.max_bytes_per_sec&quot;</span> : <span class="string">&quot;320mb&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>P.S.</p>
+<ul>
+<li><p>Transient settings are not considered for backup</p>
+</li>
+<li><p>Also can capture these cluster settings in a data backup snapshot by specifying the include_global_state: true (default) parameter for the snapshot API.</p>
+</li>
+</ul>
+<h2 id="Snapshot-Repository"><a href="#Snapshot-Repository" class="headerlink" title="Snapshot Repository"></a>Snapshot Repository</h2><p>In order to enable backup for ES cluster data, a snapshot repository must be registered before performing snapshot and restore operations.</p>
+<p>Snapshots can be stored in:</p>
+<ul>
+<li><p>Local shared filesystem: NFS</p>
+</li>
+<li><p>Remote repositories: backed by the cloud (AWS / Azure / GCP) or by distributed file systems (HDFS) with <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3BsdWdpbnMvNy4xMC9yZXBvc2l0b3J5Lmh0bWw=" title="https://www.elastic.co/guide/en/elasticsearch/plugins/7.10/repository.html">repository plugins<i class="fa fa-external-link"></i></span></p>
+</li>
+</ul>
+<p>Considering that if use shared filesystem NFS, additional setup / configuration is required, and the cluster needs rolling restart to take effect. As all nodes must have access to the shared storage to be able to store the snapshot data. Therefore, from the perspective of complexity and operational safety, will not consider it (even the cluster only uses a little of the disk space).</p>
+<p>And luckily we’ve got <code>repository-s3</code> plugin installed on all nodes in the ES cluster, so rolling restart is not needed if using S3 as snapshot repository.</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ES_PATH_CONF=<span class="regexp">/etc/</span>elasticsearch <span class="regexp">/usr/</span>share<span class="regexp">/elasticsearch/</span>bin/elasticsearch-plugin list</span><br><span class="line"></span><br><span class="line">discovery-ec2</span><br><span class="line">repository-s3</span><br></pre></td></tr></table></figure>
+
+<p>So would prefer to use AWS S3 as a remote snapshot repository with existing S3 repository plugin.</p>
+<p>Backup retention strategy<br>Based on backup granularity and retention time, we can choose the following strategies based on different scenario:</p>
+<ul>
+<li><p>Takes daily snapshots (during the hour we specify) and retains up to 14 of them for 30 days.</p>
+</li>
+<li><p>Takes hourly snapshots and retains up to 336 of them for 14 days.</p>
+</li>
+</ul>
+<p>Can carefully start with daily backup (the initial backup may take relatively longer time) and keep monitoring, and then could try 2 or 4 times per day, and ultimately with hourly backup if it’s feasible, in order to provide more granular recovery points.</p>
+<blockquote>
+<p>Incremental snapshot mechanism</p>
+<p>The snapshot functionality will simply remove the data that was only referenced by the deleted snapshot but will leave the data that is still required for other snapshots in the repository.</p>
+<p>So it would be safe to delete the first initial snapshot without affecting the latter snapshots.</p>
+<p>Ref: <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ibG9nL2ZvdW5kLWVsYXN0aWNzZWFyY2gtc25hcHNob3QtYW5kLXJlc3RvcmU=" title="https://www.elastic.co/blog/found-elasticsearch-snapshot-and-restore">https://www.elastic.co/blog/found-elasticsearch-snapshot-and-restore<i class="fa fa-external-link"></i></span></p>
+</blockquote>
+<h1 id="Backup-cluster’s-data"><a href="#Backup-cluster’s-data" class="headerlink" title="Backup cluster’s data"></a>Backup cluster’s data</h1><p>Will take snapshot per index, instead of backup the whole cluster, which can potentially bring the flexibility for the restore step.</p>
+<p>The snapshots are taken incrementally. This enables us to take frequent snapshots with minimal overhead (the initial backup may take relatively longer time, based on the amount of data). The more frequently we take snapshots, the less time it will take to complete the backup.</p>
+<p>The snapshot process is executed in non-blocking fashion. All indexing and searching operations can continue to run against the index that is being snapshotted.</p>
+<h2 id="Snapshot-Prerequisites"><a href="#Snapshot-Prerequisites" class="headerlink" title="Snapshot Prerequisites"></a>Snapshot Prerequisites</h2><ul>
+<li>Check repository-s3 plugin is installed</li>
+</ul>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ ES_PATH_CONF=<span class="regexp">/etc/</span>elasticsearch <span class="regexp">/usr/</span>share<span class="regexp">/elasticsearch/</span>bin/elasticsearch-plugin list</span><br><span class="line"></span><br><span class="line">discovery-ec2</span><br><span class="line">repository-s3</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>Create an S3 bucket to store the snapshot (e.g. <code>es-backup</code>)</p>
+</li>
+<li><p>Check current iam instance profile role on ES cluster</p>
+</li>
+<li><p>Update existing IAM role and setup proper S3 Permissions</p>
+</li>
+</ul>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>,</span><br><span class="line">    <span class="attr">&quot;Statement&quot;</span>: [</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Action&quot;</span>: [</span><br><span class="line">                <span class="string">&quot;s3:ListAllMyBuckets&quot;</span>,</span><br><span class="line">                <span class="string">&quot;s3:GetBucketLocation&quot;</span></span><br><span class="line">            ],</span><br><span class="line">            <span class="attr">&quot;Resource&quot;</span>: <span class="string">&quot;arn:aws:s3:::*&quot;</span></span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Action&quot;</span>: [</span><br><span class="line">                <span class="string">&quot;s3:ListBucket&quot;</span>,</span><br><span class="line">                <span class="string">&quot;s3:ListBucketMultipartUploads&quot;</span>,</span><br><span class="line">                <span class="string">&quot;s3:ListBucketVersions&quot;</span></span><br><span class="line">            ],</span><br><span class="line">            <span class="attr">&quot;Resource&quot;</span>: [</span><br><span class="line">                <span class="string">&quot;arn:aws:s3:::es-backup&quot;</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;,</span><br><span class="line">        &#123;</span><br><span class="line">            <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">            <span class="attr">&quot;Action&quot;</span>: [</span><br><span class="line">                <span class="string">&quot;s3:GetObject&quot;</span>,</span><br><span class="line">                <span class="string">&quot;s3:GetObjectAcl&quot;</span>,</span><br><span class="line">                <span class="string">&quot;s3:PutObject&quot;</span>,</span><br><span class="line">                <span class="string">&quot;s3:PutObjectAcl&quot;</span>,</span><br><span class="line">                <span class="string">&quot;s3:DeleteObject&quot;</span>,</span><br><span class="line">                <span class="string">&quot;s3:AbortMultipartUpload&quot;</span>,</span><br><span class="line">                <span class="string">&quot;s3:ListMultipartUploadParts&quot;</span></span><br><span class="line">            ],</span><br><span class="line">            <span class="attr">&quot;Resource&quot;</span>: [</span><br><span class="line">                <span class="string">&quot;arn:aws:s3:::es-backup/*&quot;</span></span><br><span class="line">            ]</span><br><span class="line">        &#125;</span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Need to update the role permission for both ES master / data node</li>
+</ul>
+<blockquote>
+<p>Otherwise will get the repository_verification_exception error when trying to register the snapshot repository</p>
+</blockquote>
+<figure class="highlight inform7"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">&quot;root_cause&quot;</span> : <span class="comment">[</span></span><br><span class="line"><span class="comment">  &#123;</span></span><br><span class="line"><span class="comment">    &quot;type&quot; : &quot;repository_verification_exception&quot;,</span></span><br><span class="line"><span class="comment">    &quot;reason&quot; : &quot;<span class="comment">[snapshot-s3-repo]</span> <span class="comment">[<span class="comment">[zMHw44eLS7q0ItSfYmh2Ug, &#x27;RemoteTransportException<span class="comment">[<span class="comment">[elastic-data-warm-0db25600a6f728fe9]</span><span class="comment">[172.17.24.56:9300]</span><span class="comment">[internal:admin/repository/verify]</span>]</span>; nested: BlobStoreException<span class="comment">[Failed to check if blob <span class="comment">[master.dat]</span> exists]</span>; nested: NotSerializableExceptionWrapper<span class="comment">[amazon_s3_exception: Forbidden (Service: Amazon S3; Status Code: 403; Error Code: 403 Forbidden; Request ID: 425B663C880BBD13; S3 Extended Request ID: huXmNMJSK+Lh4vW5LIqJsYUfu9s3ZhPa2knSeblOVBbNnoffvYaZXhMz4sgfT8ZGTAAC+3yjUNc=)]</span>;&#x27;]</span></span></span></span><br><span class="line"><span class="comment"><span class="comment">    ...</span></span></span><br><span class="line"><span class="comment"><span class="comment">    ]</span>&quot;</span></span><br><span class="line"><span class="comment">  &#125;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Register snapshot repository per index with base_path (prefix) in S3 bucket for ES cluster (one-time operation)</li>
+</ul>
+<figure class="highlight autohotkey"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># use `base_path` under S3 for `service-A`</span><br><span class="line"></span><br><span class="line">curl -X PUT <span class="string">&quot;localhost:9200/_snapshot/snapshot-s3-repo?pretty&quot;</span> -H &#x27;Content-Type: application/json&#x27; -d&#x27;</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;type&quot;</span>: <span class="string">&quot;s3&quot;</span>,</span><br><span class="line">  <span class="string">&quot;settings&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;bucket&quot;</span>: <span class="string">&quot;es-backup&quot;</span>,</span><br><span class="line">    <span class="string">&quot;region&quot;</span>: <span class="string">&quot;us-west-2&quot;</span>,</span><br><span class="line">    <span class="string">&quot;base_path&quot;</span>: <span class="string">&quot;service-A&quot;</span>,</span><br><span class="line">    <span class="string">&quot;max_snapshot_bytes_per_sec&quot;</span>: <span class="string">&quot;500mb&quot;</span>,</span><br><span class="line">    <span class="string">&quot;max_restore_bytes_per_sec&quot;</span>: <span class="string">&quot;1gb&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#x27;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Register snapshot repository for each index (with base_path: same S3 bucket, different directory)</li>
+</ul>
+<figure class="highlight sml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"># e.g. for .elastichq</span><br><span class="line"></span><br><span class="line">curl -<span class="type">X</span> <span class="type">PUT</span> <span class="string">&quot;localhost:9200/_snapshot/snapshot-s3-elastichq?pretty&quot;</span> -<span class="type">H</span> <span class="symbol">&#x27;Content</span>-<span class="type">Type</span>: application/json&#x27; -d&#x27;</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;type&quot;</span>: <span class="string">&quot;s3&quot;</span>,</span><br><span class="line">  <span class="string">&quot;settings&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;bucket&quot;</span>: <span class="string">&quot;es-backup&quot;</span>,</span><br><span class="line">    <span class="string">&quot;base_path&quot;</span>: <span class="string">&quot;elastichq&quot;</span>,</span><br><span class="line">    <span class="string">&quot;region&quot;</span>: <span class="string">&quot;us-west-2&quot;</span>,</span><br><span class="line">    <span class="string">&quot;max_snapshot_bytes_per_sec&quot;</span>: <span class="string">&quot;500mb&quot;</span>,</span><br><span class="line">    <span class="string">&quot;max_restore_bytes_per_sec&quot;</span>: <span class="string">&quot;1gb&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="string">&#x27;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Check or Verify snapshot repository<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">curl</span> localhost:<span class="number">9200</span>/_snapshot?pretty</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h1 id="Backup-operation"><a href="#Backup-operation" class="headerlink" title="Backup operation"></a>Backup operation</h1><p>The snapshots lifecycle management (SLM) feature is introduced and natively supported in ES version 7.5.0, so for lower version need to self-manage the snapshots / retention policy.</p>
+<p>At this stage, can use existing tool curator (with cronjob) on EC2 instance (e.g. gateway / master node), to make the entire process run first. And then if it runs normally, can consider using ECS cronjob (scheduled task) to schedule the backup in the next phrase to avoid single point of failure.</p>
+<p>For curator version compatibility, should be safe to choose the latest version <code>5.8.3</code> to support ES <code>6.X</code>.</p>
+<p>Backup operation with ES snapshot API:</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># e.g. backup specified indice</span></span><br><span class="line"></span><br><span class="line">curl -X PUT <span class="string">&quot;localhost:9200/_snapshot/snapshot-s3-repo/elastichq-20201125?wait_for_completion=false&amp;pretty&quot;</span> -H &#x27;Content-Type: <span class="built_in">application</span>/json&#x27; -d&#x27;</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;indices&quot;</span>: <span class="string">&quot;.elastichq&quot;</span>,</span><br><span class="line">  <span class="string">&quot;ignore_unavailable&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">  <span class="string">&quot;include_global_state&quot;</span>: <span class="literal">false</span></span><br><span class="line">&#125;</span><br><span class="line">&#x27;</span><br><span class="line"></span><br><span class="line"><span class="comment"># check snapshots</span></span><br><span class="line"></span><br><span class="line">curl localhost:<span class="number">9200</span>/_snapshot/snapshot-s3-repo/_all?pretty</span><br><span class="line"></span><br><span class="line"><span class="comment"># delete snapshot</span></span><br><span class="line"></span><br><span class="line">curl -X DELETE <span class="string">&quot;localhost:9200/_snapshot/snapshot-s3-repo/elastichq-20201125?pretty&quot;</span></span><br></pre></td></tr></table></figure>
+
+<p>Useful Config for Snapshot / Restore Process</p>
+<blockquote>
+<p><code>max_restore_bytes_per_sec</code></p>
+<p>Throttles per node restore rate. Defaults to unlimited. Note that restores are also throttled through <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS83LjEwL3JlY292ZXJ5Lmh0bWw=" title="https://www.elastic.co/guide/en/elasticsearch/reference/7.10/recovery.html">recovery settings<i class="fa fa-external-link"></i></span>.</p>
+<p><code>max_snapshot_bytes_per_sec</code></p>
+<p>Throttles per node snapshot rate. Defaults to <code>40mb</code> per second.</p>
+<p><code>chunk_size</code></p>
+<p>Big files can be broken down into chunks during snapshotting if needed. Specify the chunk size as a value and unit, for example: 1GB, 10MB, 5KB, 500B. Defaults to <code>1GB</code>.</p>
+<p><code>buffer_size</code></p>
+<p>Minimum threshold below which the chunk is uploaded using a single request. Beyond this threshold, the S3 repository will use the <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL0FtYXpvblMzL2xhdGVzdC9kZXYvdXBsb2Fkb2JqdXNpbmdtcHUuaHRtbA==" title="https://docs.aws.amazon.com/AmazonS3/latest/dev/uploadobjusingmpu.html">AWS Multipart Upload API<i class="fa fa-external-link"></i></span> to split the chunk into several parts, each of buffer_size length, and to upload each part in its own request. Should between 5mb to 5gb. Defaults to the minimum between 100mb and 5% of the heap size.</p>
+</blockquote>
+<h2 id="Restore-cluster’s-data"><a href="#Restore-cluster’s-data" class="headerlink" title="Restore cluster’s data"></a>Restore cluster’s data</h2><h3 id="Restore-Prerequisites"><a href="#Restore-Prerequisites" class="headerlink" title="Restore Prerequisites"></a>Restore Prerequisites</h3><ul>
+<li><p>Confirm the target index has same number of shards as the index in the snapshot</p>
+</li>
+<li><p>Close the target index need to be restored</p>
+</li>
+</ul>
+<blockquote>
+<p>Reference</p>
+<p>Just to mention here as a reference: By default, the cluster state is not restored. To include the global cluster state, need to set include_global_state to true in the restore request body (if include the cluster state in the previous backup operation). </p>
+<p>Usually we don’t want to backup the cluster state. And the cluster settings (not including index / shard settings) are stored in our configuration management settings</p>
+<p>An existing index can be only restored if it’s closed and has the same number of shards as the index in the snapshot. </p>
+<p>The restore operation automatically opens restored indices if they were closed, and creates new indices if they didn’t exist in the cluster.</p>
+</blockquote>
+<h3 id="Restore-operation"><a href="#Restore-operation" class="headerlink" title="Restore operation"></a>Restore operation</h3><p>In order to restore the index from a snapshot:</p>
+<ul>
+<li>Update index settings to speed up restore process:</li>
+</ul>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"># before restore</span><br><span class="line">curl -XPUT <span class="string">&quot;localhost:9200/&#123;index_name&#125;/_settings&quot;</span> -d&#x27; &#123;</span><br><span class="line">        <span class="string">&quot;number_of_replicas&quot;</span> : 0,</span><br><span class="line">        <span class="string">&quot;refresh_interval&quot;</span> : &quot;-1&quot;</span><br><span class="line">&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>Restore snapshot from S3 (Set the index settings back at the same time)</li>
+</ul>
+<figure class="highlight crmsh"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># e.g restore from specific snapshot service-A</span></span><br><span class="line"></span><br><span class="line">curl -XPOST <span class="string">&quot;localhost:9200/_snapshot/snapshot-s3-repo/service-A-2020112416/_restore?pretty&quot;</span> -H &#x27;Content-<span class="keyword">Type</span>: application/json&#x27; -d&#x27;</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;indices&quot;</span>: <span class="string">&quot;service-A&quot;</span>,</span><br><span class="line">  <span class="string">&quot;ignore_unavailable&quot;</span>: <span class="literal">true</span>,</span><br><span class="line">  <span class="string">&quot;include_global_state&quot;</span>: <span class="literal">false</span>,</span><br><span class="line">  <span class="string">&quot;include_aliases&quot;</span>: <span class="literal">false</span>,</span><br><span class="line">  <span class="string">&quot;index_settings&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;index.number_of_replicas&quot;</span>: <span class="number">2</span>,</span><br><span class="line">    <span class="string">&quot;index.refresh_interval&quot;</span>: <span class="string">&quot;1s&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line">&#x27;</span><br></pre></td></tr></table></figure>
+
+<p>P.S.</p>
+<ul>
+<li><p>Use the <code>index_settings</code> parameter to override index settings during the restore process</p>
+</li>
+<li><p>Set <code>include_aliases</code> to <code>false</code> to prevent aliases from being restored together with associated indices</p>
+</li>
+</ul>
+<h1 id="Curator-Usage"><a href="#Curator-Usage" class="headerlink" title="Curator Usage"></a>Curator Usage</h1><h2 id="use-curator-cli"><a href="#use-curator-cli" class="headerlink" title="use curator_cli"></a>use <code>curator_cli</code></h2><p>Examples:</p>
+<p><code>&quot;$&#123;DRY_RUN&#125;&quot;</code> can be <code>--dry-run</code> or <code>&quot;&quot;</code> (empty)</p>
+<ul>
+<li>create snapshot</li>
+</ul>
+<figure class="highlight dsconfig"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># create snapshot for index(es) in the same repo</span></span><br><span class="line"></span><br><span class="line">/<span class="string">usr</span>/<span class="string">local</span>/<span class="string">bin</span>/<span class="string">curator_cli</span> \</span><br><span class="line">	$&#123;<span class="string">DRY_RUN</span>&#125; \</span><br><span class="line">	<span class="built_in">--host</span> <span class="string">&quot;$&#123;ELASTICSEARCH_HOST&#125;&quot;</span> \</span><br><span class="line">	<span class="built_in">--port</span> <span class="string">9200</span> \</span><br><span class="line">	<span class="string">snapshot</span> \</span><br><span class="line">	<span class="built_in">--repository</span> <span class="string">&quot;$&#123;REPO_NAME&#125;&quot;</span> \</span><br><span class="line">	<span class="built_in">--name</span> <span class="string">&quot;$&#123;INDEX_PREFIX&#125;-$&#123;curr_date&#125;&quot;</span> \</span><br><span class="line">	<span class="built_in">--wait_for_completion</span> <span class="built_in">--skip_repo_fs_check</span> \</span><br><span class="line">	<span class="built_in">--filter_list</span> <span class="string">&quot;&#123;\&quot;</span><span class="string">filtertype</span>\<span class="string">&quot;:\&quot;</span><span class="string">pattern</span>\<span class="string">&quot;,\&quot;</span><span class="string">kind</span>\<span class="string">&quot;:\&quot;</span><span class="string">prefix</span>\<span class="string">&quot;,\&quot;</span><span class="string">value</span>\<span class="string">&quot;:\&quot;</span>$&#123;<span class="string">INDEX_PREFIX</span>&#125;\<span class="string">&quot;&#125;&quot;</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>remove snapshot</p>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"># remove old snapshots for index(es) in the same repo</span><br><span class="line"></span><br><span class="line">/usr/local/bin/curator_cli \</span><br><span class="line">	$&#123;DRY_RUN&#125; \</span><br><span class="line">	--host <span class="string">&quot;$&#123;ELASTICSEARCH_HOST&#125;&quot;</span> \</span><br><span class="line">	--port <span class="number">9200</span> \</span><br><span class="line">	delete_snapshots \</span><br><span class="line">	--repository <span class="string">&quot;$&#123;REPO_NAME&#125;&quot;</span> \</span><br><span class="line">	--ignore_empty_list \</span><br><span class="line">	--filter_list <span class="string">&quot;[&#123;<span class="subst">\&quot;</span>filtertype<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>age<span class="subst">\&quot;</span>,<span class="subst">\&quot;</span>source<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>creation_date<span class="subst">\&quot;</span>,<span class="subst">\&quot;</span>direction<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>older<span class="subst">\&quot;</span>,<span class="subst">\&quot;</span>unit<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>$&#123;UNIT&#125;<span class="subst">\&quot;</span>,<span class="subst">\&quot;</span>unit_count<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>$&#123;UNIT_COUNT&#125;<span class="subst">\&quot;</span>&#125;,&#123;<span class="subst">\&quot;</span>filtertype<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>pattern<span class="subst">\&quot;</span>,<span class="subst">\&quot;</span>kind<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>prefix<span class="subst">\&quot;</span>,<span class="subst">\&quot;</span>value<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>$&#123;INDEX_PREFIX&#125;<span class="subst">\&quot;</span>&#125;]&quot;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>restore snapshot</p>
+</li>
+</ul>
+<figure class="highlight lsl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"># close first</span><br><span class="line"></span><br><span class="line">/usr/local/bin/curator_cli \</span><br><span class="line">	$&#123;DRY_RUN&#125; \</span><br><span class="line">	--host <span class="string">&quot;$&#123;ELASTICSEARCH_HOST&#125;&quot;</span> \</span><br><span class="line">	--port <span class="number">9200</span> \</span><br><span class="line">	close \</span><br><span class="line">	--ignore_empty_list \</span><br><span class="line">	--filter_list <span class="string">&quot;&#123;<span class="subst">\&quot;</span>filtertype<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>pattern<span class="subst">\&quot;</span>,<span class="subst">\&quot;</span>kind<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>prefix<span class="subst">\&quot;</span>,<span class="subst">\&quot;</span>value<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>$&#123;INDEX_PREFIX&#125;<span class="subst">\&quot;</span>&#125;&quot;</span></span><br><span class="line"></span><br><span class="line"># restore</span><br><span class="line"></span><br><span class="line">/usr/local/bin/curator_cli \</span><br><span class="line">	$&#123;DRY_RUN&#125; \</span><br><span class="line">	--host <span class="string">&quot;$&#123;ELASTICSEARCH_HOST&#125;&quot;</span> \</span><br><span class="line">	--port <span class="number">9200</span> \</span><br><span class="line">	restore \</span><br><span class="line">	--repository <span class="string">&quot;$&#123;REPO_NAME&#125;&quot;</span> \</span><br><span class="line">	--wait_for_completion --skip_repo_fs_check --ignore_empty_list \</span><br><span class="line">	--filter_list <span class="string">&quot;[&#123;<span class="subst">\&quot;</span>filtertype<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>state<span class="subst">\&quot;</span>&#125;,&#123;<span class="subst">\&quot;</span>filtertype<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>pattern<span class="subst">\&quot;</span>,<span class="subst">\&quot;</span>kind<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>prefix<span class="subst">\&quot;</span>,<span class="subst">\&quot;</span>value<span class="subst">\&quot;</span>:<span class="subst">\&quot;</span>$&#123;INDEX_PREFIX&#125;<span class="subst">\&quot;</span>&#125;]&quot;</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="use-curator"><a href="#use-curator" class="headerlink" title="use curator"></a>use <code>curator</code></h2><p>Examples:</p>
+<p><code>&quot;$&#123;DRY_RUN&#125;&quot;</code> can be <code>--dry-run</code> or <code>&quot;&quot;</code> (empty)</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="regexp">/usr/</span>local<span class="regexp">/bin/</span>curator --config <span class="regexp">/etc/</span>curator<span class="regexp">/config.yml &quot;$&#123;DRY_RUN&#125;&quot; /</span>etc<span class="regexp">/curator/</span>actions.yml</span><br></pre></td></tr></table></figure>
+
+<p><code>actions.yml</code> for <code>snapshot</code>:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># snapshot</span></span><br><span class="line"></span><br><span class="line"><span class="attr">actions:</span></span><br><span class="line">  <span class="attr">1:</span></span><br><span class="line">    <span class="attr">action:</span> <span class="string">snapshot</span></span><br><span class="line">    <span class="attr">description:</span> <span class="string">&gt;-</span></span><br><span class="line">      <span class="string">Snapshot</span> <span class="string">company-index-A-*</span> <span class="string">prefixed</span> <span class="string">indices</span> <span class="string">with</span> <span class="string">the</span> <span class="string">default</span> <span class="string">snapshot</span> <span class="string">name</span> <span class="string">pattern</span> <span class="string">of</span></span><br><span class="line">      <span class="string">&#x27;company-index-A-%Y%m%d%H%M&#x27;</span><span class="string">.</span>  <span class="string">Wait</span> <span class="string">for</span> <span class="string">the</span> <span class="string">snapshot</span> <span class="string">to</span> <span class="string">complete.</span>  <span class="string">Skip</span></span><br><span class="line">      <span class="string">the</span> <span class="string">repository</span> <span class="string">filesystem</span> <span class="string">access</span> <span class="string">check.</span>  <span class="string">Use</span> <span class="string">the</span> <span class="string">other</span> <span class="string">options</span> <span class="string">to</span> <span class="string">create</span></span><br><span class="line">      <span class="string">the</span> <span class="string">snapshot.</span></span><br><span class="line">    <span class="attr">options:</span></span><br><span class="line">      <span class="attr">repository:</span> <span class="string">snapshot-s3-index-A</span></span><br><span class="line">      <span class="comment"># Leaving name blank will result in the default &#x27;curator-%Y%m%d%H%M&#x27;</span></span><br><span class="line">      <span class="attr">name:</span> <span class="string">company-index-A-%Y%m%d%H%M</span></span><br><span class="line">      <span class="attr">ignore_unavailable:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">include_global_state:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">partial:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">wait_for_completion:</span> <span class="literal">True</span></span><br><span class="line">      <span class="attr">skip_repo_fs_check:</span> <span class="literal">True</span></span><br><span class="line">      <span class="attr">disable_action:</span> <span class="literal">False</span></span><br><span class="line">    <span class="attr">filters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">filtertype:</span> <span class="string">pattern</span></span><br><span class="line">        <span class="attr">kind:</span> <span class="string">prefix</span></span><br><span class="line">        <span class="attr">value:</span> <span class="string">company-index-A</span></span><br><span class="line">  <span class="attr">2:</span></span><br><span class="line">    <span class="attr">action:</span> <span class="string">delete_snapshots</span></span><br><span class="line">    <span class="attr">description:</span> <span class="string">&gt;-</span></span><br><span class="line">      <span class="string">Delete</span> <span class="string">snapshots</span> <span class="string">from</span> <span class="string">the</span> <span class="string">selected</span> <span class="string">repository</span> <span class="string">older</span> <span class="string">than</span> <span class="number">14</span> <span class="string">days</span></span><br><span class="line">      <span class="string">(based</span> <span class="string">on</span> <span class="string">creation_date),</span> <span class="string">for</span> <span class="string">&#x27;company-index-A-*&#x27;</span> <span class="string">prefixed</span> <span class="string">snapshots.</span></span><br><span class="line">    <span class="attr">options:</span></span><br><span class="line">      <span class="attr">repository:</span> <span class="string">snapshot-s3-index-A</span></span><br><span class="line">      <span class="comment"># Leaving name blank will result in the default &#x27;curator-%Y%m%d%H%M&#x27;</span></span><br><span class="line">      <span class="attr">disable_action:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">ignore_empty_list:</span> <span class="literal">True</span></span><br><span class="line">    <span class="attr">filters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">filtertype:</span> <span class="string">pattern</span></span><br><span class="line">        <span class="attr">kind:</span> <span class="string">prefix</span></span><br><span class="line">        <span class="attr">value:</span> <span class="string">company-index-A</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">filtertype:</span> <span class="string">age</span></span><br><span class="line">        <span class="attr">source:</span> <span class="string">creation_date</span></span><br><span class="line">        <span class="attr">direction:</span> <span class="string">older</span></span><br><span class="line">        <span class="attr">unit:</span> <span class="string">days</span></span><br><span class="line">        <span class="attr">unit_count:</span> <span class="number">14</span></span><br></pre></td></tr></table></figure>
+
+<p><code>actions.yml</code> for <code>restore</code>:</p>
+<figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">actions:</span></span><br><span class="line">  <span class="attr">1:</span></span><br><span class="line">    <span class="attr">action:</span> <span class="string">close</span></span><br><span class="line">    <span class="attr">description:</span> <span class="string">&quot;Close selected indices company-index-A before restoring snapshot&quot;</span></span><br><span class="line">    <span class="attr">options:</span></span><br><span class="line">      <span class="attr">continue_if_exception:</span> <span class="literal">True</span></span><br><span class="line">      <span class="attr">ignore_empty_list:</span> <span class="literal">True</span></span><br><span class="line">    <span class="attr">filters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">filtertype:</span> <span class="string">pattern</span></span><br><span class="line">        <span class="attr">kind:</span> <span class="string">prefix</span></span><br><span class="line">        <span class="attr">value:</span> <span class="string">company-index-A</span></span><br><span class="line">  <span class="attr">2:</span></span><br><span class="line">    <span class="attr">action:</span> <span class="string">restore</span></span><br><span class="line">    <span class="attr">description:</span> <span class="string">&gt;-</span></span><br><span class="line">      <span class="string">Restore</span> <span class="string">all</span> <span class="string">indices</span> <span class="string">in</span> <span class="string">the</span> <span class="string">most</span> <span class="string">recent</span> <span class="string">company-index-A-*</span> <span class="string">snapshot</span> <span class="string">with</span> <span class="string">state</span></span><br><span class="line">      <span class="string">SUCCESS.</span>  <span class="string">Wait</span> <span class="string">for</span> <span class="string">the</span> <span class="string">restore</span> <span class="string">to</span> <span class="string">complete</span> <span class="string">before</span> <span class="string">continuing.</span>  <span class="string">Skip</span></span><br><span class="line">      <span class="string">the</span> <span class="string">repository</span> <span class="string">filesystem</span> <span class="string">access</span> <span class="string">check.</span>  <span class="string">Use</span> <span class="string">the</span> <span class="string">other</span> <span class="string">options</span> <span class="string">to</span> <span class="string">define</span></span><br><span class="line">      <span class="string">the</span> <span class="string">index/shard</span> <span class="string">settings</span> <span class="string">for</span> <span class="string">the</span> <span class="string">restore.</span></span><br><span class="line">    <span class="attr">options:</span></span><br><span class="line">      <span class="attr">repository:</span> <span class="string">snapshot-s3-index-A</span></span><br><span class="line">      <span class="comment"># Leaving name blank will result in restoring the most recent snapshot by age</span></span><br><span class="line">      <span class="attr">name:</span></span><br><span class="line">      <span class="comment"># Leaving indices blank will result in restoring all indices in the snapshot</span></span><br><span class="line">      <span class="attr">indices:</span></span><br><span class="line">      <span class="attr">include_aliases:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">ignore_unavailable:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">include_global_state:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">partial:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">extra_settings:</span></span><br><span class="line">        <span class="attr">index_settings:</span></span><br><span class="line">          <span class="attr">number_of_replicas:</span> <span class="number">2</span></span><br><span class="line">      <span class="attr">wait_for_completion:</span> <span class="literal">True</span></span><br><span class="line">      <span class="attr">skip_repo_fs_check:</span> <span class="literal">True</span></span><br><span class="line">      <span class="attr">disable_action:</span> <span class="literal">False</span></span><br><span class="line">    <span class="attr">filters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">filtertype:</span> <span class="string">pattern</span></span><br><span class="line">        <span class="attr">kind:</span> <span class="string">prefix</span></span><br><span class="line">        <span class="attr">value:</span> <span class="string">company-index-A</span></span><br><span class="line">        <span class="attr">exclude:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">filtertype:</span> <span class="string">state</span></span><br><span class="line">        <span class="attr">state:</span> <span class="string">SUCCESS</span></span><br><span class="line">        <span class="attr">exclude:</span></span><br></pre></td></tr></table></figure>
+
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L2JhY2t1cC1jbHVzdGVyLmh0bWw=" title="https://www.elastic.co/guide/en/elasticsearch/reference/current/backup-cluster.html">Elastic - Backup Cluster<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3BsdWdpbnMvNy4xMC9yZXBvc2l0b3J5LXMzLmh0bWw=" title="https://www.elastic.co/guide/en/elasticsearch/plugins/7.10/repository-s3.html">S3 repository plugin<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3BsdWdpbnMvY3VycmVudC9yZXBvc2l0b3J5LXMzLXJlcG9zaXRvcnkuaHRtbA==" title="https://www.elastic.co/guide/en/elasticsearch/plugins/current/repository-s3-repository.html">Repository settings<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ibG9nL2ZvdW5kLWVsYXN0aWNzZWFyY2gtc25hcHNob3QtYW5kLXJlc3RvcmU=" title="https://www.elastic.co/blog/found-elasticsearch-snapshot-and-restore">ES - Snapshot and Restore (incremental snapshot mechanism)<i class="fa fa-external-link"></i></span></p>
+</li>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL2NsaWVudC9jdXJhdG9yLzUuOC9pbmRleC5odG1s" title="https://www.elastic.co/guide/en/elasticsearch/client/curator/5.8/index.html">Elastic Curator<i class="fa fa-external-link"></i></span></p>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    Donate
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="David Lu WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="David Lu Alipay">
+        <p>Alipay</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>Welcome to my other publishing channels</p>
+
+    <div class="social-list">
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="https://twitter.com/davidlu1001">
+                <span class="icon">
+                  <i class="fa fa-twitter"></i>
+                </span>
+
+                <span class="label">Twitter</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="https://t.me/nztrain">
+                <span class="icon">
+                  <i class="fa fa-telegram"></i>
+                </span>
+
+                <span class="label">Telegram</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+                <span class="icon">
+                  <i class="fa fa-wechat"></i>
+                </span>
+
+                <span class="label">WeChat</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="/atom.xml">
+                <span class="icon">
+                  <i class="fa fa-rss"></i>
+                </span>
+
+                <span class="label">RSS</span>
+              </a>
+            </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/ElasticSearch/" rel="tag"><i class="fa fa-tag"></i> ElasticSearch</a>
+              <a href="/tags/SRE/" rel="tag"><i class="fa fa-tag"></i> SRE</a>
+              <a href="/tags/Backup/" rel="tag"><i class="fa fa-tag"></i> Backup</a>
+              <a href="/tags/DR/" rel="tag"><i class="fa fa-tag"></i> DR</a>
+              <a href="/tags/S3/" rel="tag"><i class="fa fa-tag"></i> S3</a>
+              <a href="/tags/curator/" rel="tag"><i class="fa fa-tag"></i> curator</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/06/22/Terraform-Upgrade-to-0-12/" rel="prev" title="Terraform Upgrade to 0.12">
+      <i class="fa fa-chevron-left"></i> Terraform Upgrade to 0.12
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#TL-DR"><span class="nav-number">1.</span> <span class="nav-text">TL;DR</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Overview"><span class="nav-number">2.</span> <span class="nav-text">Overview</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Backup-content"><span class="nav-number">2.1.</span> <span class="nav-text">Backup content</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Snapshot-Repository"><span class="nav-number">2.2.</span> <span class="nav-text">Snapshot Repository</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Backup-cluster%E2%80%99s-data"><span class="nav-number">3.</span> <span class="nav-text">Backup cluster’s data</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Snapshot-Prerequisites"><span class="nav-number">3.1.</span> <span class="nav-text">Snapshot Prerequisites</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Backup-operation"><span class="nav-number">4.</span> <span class="nav-text">Backup operation</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Restore-cluster%E2%80%99s-data"><span class="nav-number">4.1.</span> <span class="nav-text">Restore cluster’s data</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Restore-Prerequisites"><span class="nav-number">4.1.1.</span> <span class="nav-text">Restore Prerequisites</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Restore-operation"><span class="nav-number">4.1.2.</span> <span class="nav-text">Restore operation</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Curator-Usage"><span class="nav-number">5.</span> <span class="nav-text">Curator Usage</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#use-curator-cli"><span class="nav-number">5.1.</span> <span class="nav-text">use curator_cli</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#use-curator"><span class="nav-number">5.2.</span> <span class="nav-text">use curator</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#References"><span class="nav-number">6.</span> <span class="nav-text">References</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">David Lu</p>
+  <div class="site-description" itemprop="description">Technology enthusiast</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;davidlu1001"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly90d2l0dGVyLmNvbS9kYXZpZGx1MTAwMQ==" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;davidlu1001"><i class="fa fa-fw fa-twitter"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOmRhdmlkbHUxMDAxQGdtYWlsLmNvbQ==" title="E-Mail → mailto:davidlu1001@gmail.com"><i class="fa fa-fw fa-envelope"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Lu</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">101k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:32</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://davidlu1001.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://davidlu1001.github.io/2020/12/12/ElasticSearch-backup-with-AWS-S3/";
+    this.page.identifier = "2020/12/12/ElasticSearch-backup-with-AWS-S3/";
+    this.page.title = "ElasticSearch backup with AWS S3";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://davidlu1001.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="google-site-verification" content="AIn6RYiH7oyvpWJuW_neCErD4pn7Iy9IcaCwwDr7wJg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"davidlu1001.github.io","root":"/","scheme":"Pisces","version":"7.7.2","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="BackgroundLet’s say there’s a legacy platform called XXX, and it still poses an operational cost for SRE to manage the monitoring &#x2F; alerting &#x2F; upgrade etc. At present, XXX’s ElasticSearch architecture">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ElasticSearch migrated from EC2 to AWS managed ES">
+<meta property="og:url" content="http://davidlu1001.github.io/2019/11/12/ElasticSearch-Migration-to-AWS/index.html">
+<meta property="og:site_name" content="Davidlu&#39;s Blog">
+<meta property="og:description" content="BackgroundLet’s say there’s a legacy platform called XXX, and it still poses an operational cost for SRE to manage the monitoring &#x2F; alerting &#x2F; upgrade etc. At present, XXX’s ElasticSearch architecture">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2019-11-12T08:07:58.000Z">
+<meta property="article:modified_time" content="2020-12-11T09:52:39.132Z">
+<meta property="article:author" content="David Lu">
+<meta property="article:tag" content="AWS">
+<meta property="article:tag" content="ElasticSearch">
+<meta property="article:tag" content="SRE">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="http://davidlu1001.github.io/2019/11/12/ElasticSearch-Migration-to-AWS/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true
+  };
+</script>
+
+  <title>ElasticSearch migrated from EC2 to AWS managed ES | Davidlu's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-62146539-2"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-62146539-2');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Davidlu's Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Davidlu's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+      
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">17</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://davidlu1001.github.io/2019/11/12/ElasticSearch-Migration-to-AWS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="David Lu">
+      <meta itemprop="description" content="Technology enthusiast">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Davidlu's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          ElasticSearch migrated from EC2 to AWS managed ES
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2019-11-12 21:07:58" itemprop="dateCreated datePublished" datetime="2019-11-12T21:07:58+13:00">2019-11-12</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/AWS/" itemprop="url" rel="index"><span itemprop="name">AWS</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/SRE/" itemprop="url" rel="index"><span itemprop="name">SRE</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ElasticSearch/" itemprop="url" rel="index"><span itemprop="name">ElasticSearch</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/2019/11/12/ElasticSearch-Migration-to-AWS/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2019/11/12/ElasticSearch-Migration-to-AWS/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>8.4k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>8 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Background"><a href="#Background" class="headerlink" title="Background"></a>Background</h1><p>Let’s say there’s a legacy platform called XXX, and it still poses an operational cost for SRE to manage the monitoring / alerting / upgrade etc.</p>
+<p>At present, XXX’s ElasticSearch architecture consists of 3 hosts (m4.xlarge) acting as master, client and data nodes, for XXX’s searching functionality.</p>
+<p>All of them are using Ubuntu Trusty (14.04) image, which is no longer supported and need to be migrated to Xenial (16.04). Its usage seems pretty low and cost wise so we would like to migrate the XXX ES to AWS managed ElasticSearch Service to reduce operational overhead.</p>
+<p>This doc will cover the project plan / checklist for migration.</p>
+<h1 id="Solution-overview"><a href="#Solution-overview" class="headerlink" title="Solution overview"></a>Solution overview</h1><p>Elasticsearch (ES) indexes can be migrated with following steps:</p>
+<ul>
+<li><p>Create baseline indexes</p>
+<ul>
+<li>Create a snapshot repository and associate it to an AWS S3 Bucket.</li>
+<li>Create the first snapshot of the indexes to be migrated, which is a full snapshot on EC2 - The snapshot will be automatically stored in the AWS S3 bucket created in the first step.</li>
+<li>Restore this full snapshot to the AWS ES.</li>
+</ul>
+</li>
+<li><p>Periodic incremental snapshots</p>
+<ul>
+<li>Repeat serval incremental snapshot and restore.</li>
+</ul>
+</li>
+<li><p>Final snapshot and service switchover</p>
+<ul>
+<li>Stop services which can modify index data.</li>
+<li>Create a final incremental snapshot of the EC2.</li>
+<li>Perform service switchover to the AWS ES.</li>
+</ul>
+</li>
+</ul>
+<h1 id="Checklist"><a href="#Checklist" class="headerlink" title="Checklist"></a>Checklist</h1><p>Here’s a list of what will we do in detail:</p>
+<h2 id="Assess-and-analyse-current-data"><a href="#Assess-and-analyse-current-data" class="headerlink" title="Assess and analyse current data"></a>Assess and analyse current data</h2><p>The ES data is around 30G, setting <code>number_of_replicas</code> to 1, then according to the <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL2VsYXN0aWNzZWFyY2gtc2VydmljZS9sYXRlc3QvZGV2ZWxvcGVyZ3VpZGUvc2l6aW5nLWRvbWFpbnMuaHRtbA==" title="https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/sizing-domains.html">simplified version of calculation<i class="fa fa-external-link"></i></span>:</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">Source</span> Data * (<span class="number">1</span> + Number of Replicas) * <span class="number">1</span>.<span class="number">45</span> = Minimum Storage Requirement</span><br></pre></td></tr></table></figure>
+
+<p>So the minimum storage for AWS managed ES is about 90G.</p>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">curl</span> $es/_cat/indices?v</span><br><span class="line"><span class="attribute">health</span> status index              pri rep docs.count docs.deleted store.size pri.store.size</span><br><span class="line"><span class="attribute">green</span>  open   .marvel-<span class="number">2019</span>.<span class="number">10</span>.<span class="number">12</span>   <span class="number">1</span>   <span class="number">1</span>     <span class="number">115081</span>            <span class="number">0</span>      <span class="number">413</span>mb        <span class="number">206</span>.<span class="number">3</span>mb</span><br><span class="line"><span class="attribute">green</span>  open   site-<span class="number">1</span>.<span class="number">0</span>           <span class="number">200</span>   <span class="number">1</span>     <span class="number">937559</span>          <span class="number">884</span>      <span class="number">1</span>.<span class="number">6</span>gb        <span class="number">848</span>.<span class="number">7</span>mb</span><br><span class="line"><span class="attribute">green</span>  open   site_v<span class="number">1</span>            <span class="number">200</span>   <span class="number">1</span>     <span class="number">324638</span>           <span class="number">33</span>    <span class="number">335</span>.<span class="number">8</span>mb        <span class="number">167</span>.<span class="number">9</span>mb</span><br><span class="line"><span class="attribute">green</span>  open   .marvel-<span class="number">2019</span>.<span class="number">10</span>.<span class="number">14</span>   <span class="number">1</span>   <span class="number">1</span>     <span class="number">115009</span>            <span class="number">0</span>    <span class="number">424</span>.<span class="number">5</span>mb        <span class="number">212</span>.<span class="number">2</span>mb</span><br><span class="line"><span class="attribute">green</span>  open   .marvel-<span class="number">2019</span>.<span class="number">10</span>.<span class="number">15</span>   <span class="number">1</span>   <span class="number">1</span>     <span class="number">114962</span>            <span class="number">0</span>    <span class="number">424</span>.<span class="number">7</span>mb          <span class="number">212</span>mb</span><br><span class="line"><span class="attribute">green</span>  open   .marvel-<span class="number">2019</span>.<span class="number">10</span>.<span class="number">16</span>   <span class="number">1</span>   <span class="number">1</span>      <span class="number">14290</span>            <span class="number">0</span>     <span class="number">56</span>.<span class="number">3</span>mb         <span class="number">28</span>.<span class="number">3</span>mb</span><br><span class="line"><span class="attribute">green</span>  open   .marvel-<span class="number">2019</span>.<span class="number">10</span>.<span class="number">13</span>   <span class="number">1</span>   <span class="number">1</span>     <span class="number">115104</span>            <span class="number">0</span>    <span class="number">410</span>.<span class="number">5</span>mb          <span class="number">205</span>mb</span><br><span class="line"><span class="attribute">green</span>  open   search             <span class="number">200</span>   <span class="number">1</span>   <span class="number">20829799</span>      <span class="number">6167280</span>       <span class="number">24</span>gb           <span class="number">12</span>gb</span><br><span class="line"><span class="attribute">green</span>  open   .marvel-kibana       <span class="number">1</span>   <span class="number">1</span>          <span class="number">1</span>            <span class="number">0</span>      <span class="number">6</span>.<span class="number">4</span>kb          <span class="number">3</span>.<span class="number">2</span>kb</span><br></pre></td></tr></table></figure>
+
+<h2 id="Create-an-S3-bucket-for-current-Elasticsearch-data-on-EC2"><a href="#Create-an-S3-bucket-for-current-Elasticsearch-data-on-EC2" class="headerlink" title="Create an S3 bucket for current Elasticsearch data (on EC2)"></a>Create an S3 bucket for current Elasticsearch data (on EC2)</h2><figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">e</span>.g. s<span class="number">3</span>://es-backup (us-west-<span class="number">2</span>)</span><br></pre></td></tr></table></figure>
+
+<h2 id="Make-ES-Cluster-snapshot-and-move-it-to-S3"><a href="#Make-ES-Cluster-snapshot-and-move-it-to-S3" class="headerlink" title="Make ES Cluster snapshot and move it to S3"></a>Make ES Cluster snapshot and move it to S3</h2><ul>
+<li><p>check snapshot repository setttings</p>
+<figure class="highlight ada"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">curl localhost:<span class="number">9200</span>/_snapshot?pretty</span><br><span class="line"> </span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;XXX-snapshot-s3-repo&quot;</span> : &#123;</span><br><span class="line">    <span class="string">&quot;type&quot;</span> : &quot;<span class="type">s3</span><span class="string">&quot;,</span></span><br><span class="line"><span class="string">    &quot;</span>settings<span class="string">&quot; : &#123;</span></span><br><span class="line"><span class="string">      &quot;</span>bucket<span class="string">&quot; : &quot;</span>es-backup<span class="string">&quot;,</span></span><br><span class="line"><span class="string">      &quot;</span>region<span class="string">&quot; : &quot;</span>us-west-<span class="number">2</span><span class="string">&quot;</span></span><br><span class="line"><span class="string">    &#125;</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string">&#125;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>set snapshot repo to S3</p>
+<figure class="highlight scilab"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">curl -XPUT localhost:<span class="number">9200</span>/_snapshot/XXX-snapshot-s3-repo?verify=false -d <span class="string">&#x27;&#123;</span></span><br><span class="line"><span class="string">  &quot;</span><span class="built_in">type</span><span class="string">&quot;: &quot;</span>s3<span class="string">&quot;,</span></span><br><span class="line"><span class="string">  &quot;</span>settings<span class="string">&quot;: &#123;</span></span><br><span class="line"><span class="string">    &quot;</span>bucket<span class="string">&quot;: &quot;</span>es-backup<span class="string">&quot;,</span></span><br><span class="line"><span class="string">    &quot;</span>region<span class="string">&quot;: &quot;</span>us-west<span class="number">-2</span><span class="string">&quot;</span></span><br><span class="line"><span class="string">  &#125;</span></span><br><span class="line"><span class="string">&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>check indices</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl localhost:<span class="number">9200</span><span class="regexp">/_cat/i</span>ndices?pretty</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>make snapshots</p>
+<figure class="highlight applescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># specified indices</span></span><br><span class="line">curl -XPUT <span class="string">&quot;localhost:9200/_snapshot/XXX-snapshot-s3-repo/marvel-20191101?wait_for_completion=true&quot;</span> -d &#x27;&#123;</span><br><span class="line">  <span class="string">&quot;indices&quot;</span>: <span class="string">&quot;.marvel-2019.11.01&quot;</span>,</span><br><span class="line">  <span class="string">&quot;ignore_unavailable&quot;</span>: <span class="string">&quot;true&quot;</span>,</span><br><span class="line">  <span class="string">&quot;include_global_state&quot;</span>: <span class="literal">false</span></span><br><span class="line">&#125;&#x27;</span><br><span class="line"> </span><br><span class="line">&#123;<span class="string">&quot;snapshot&quot;</span>:&#123;<span class="string">&quot;snapshot&quot;</span>:<span class="string">&quot;marvel-20191024&quot;</span>,<span class="string">&quot;indices&quot;</span>:[<span class="string">&quot;.marvel-2019.10.24&quot;</span>],<span class="string">&quot;state&quot;</span>:<span class="string">&quot;SUCCESS&quot;</span>,<span class="string">&quot;start_time&quot;</span>:<span class="string">&quot;2019-10-25T00:20:47.625Z&quot;</span>,<span class="string">&quot;start_time_in_millis&quot;</span>:<span class="number">1571962847625</span>,<span class="string">&quot;end_time&quot;</span>:<span class="string">&quot;2019-10-25T00:21:06.058Z&quot;</span>,<span class="string">&quot;end_time_in_millis&quot;</span>:<span class="number">1571962866058</span>,<span class="string">&quot;duration_in_millis&quot;</span>:<span class="number">18433</span>,<span class="string">&quot;failures&quot;</span>:[],<span class="string">&quot;shards&quot;</span>:&#123;<span class="string">&quot;total&quot;</span>:<span class="number">1</span>,<span class="string">&quot;failed&quot;</span>:<span class="number">0</span>,<span class="string">&quot;successful&quot;</span>:<span class="number">1</span>&#125;&#125;&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>check snapshots</p>
+<figure class="highlight awk"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># check snapshots</span></span><br><span class="line"> </span><br><span class="line">curl localhost:<span class="number">9200</span><span class="regexp">/_snapshot/</span>XXX-snapshot-s3-repo/_all?pretty</span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;snapshots&quot;</span> : [ &#123;</span><br><span class="line">    <span class="string">&quot;snapshot&quot;</span> : <span class="string">&quot;marvel-20191016_20191018&quot;</span>,</span><br><span class="line">    <span class="string">&quot;indices&quot;</span> : [ <span class="string">&quot;site_v1&quot;</span> ],</span><br><span class="line">    <span class="string">&quot;state&quot;</span> : <span class="string">&quot;SUCCESS&quot;</span>,</span><br><span class="line">    <span class="string">&quot;start_time&quot;</span> : <span class="string">&quot;2019-10-18T01:56:21.344Z&quot;</span>,</span><br><span class="line">    <span class="string">&quot;start_time_in_millis&quot;</span> : <span class="number">1571363781344</span>,</span><br><span class="line">    <span class="string">&quot;end_time&quot;</span> : <span class="string">&quot;2019-10-18T01:57:56.012Z&quot;</span>,</span><br><span class="line">    <span class="string">&quot;end_time_in_millis&quot;</span> : <span class="number">1571363876012</span>,</span><br><span class="line">    <span class="string">&quot;duration_in_millis&quot;</span> : <span class="number">94668</span>,</span><br><span class="line">    <span class="string">&quot;failures&quot;</span> : [ ],</span><br><span class="line">    <span class="string">&quot;shards&quot;</span> : &#123;</span><br><span class="line">      <span class="string">&quot;total&quot;</span> : <span class="number">200</span>,</span><br><span class="line">      <span class="string">&quot;failed&quot;</span> : <span class="number">0</span>,</span><br><span class="line">      <span class="string">&quot;successful&quot;</span> : <span class="number">200</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125; ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+</li>
+</ul>
+<h2 id="Create-and-configure-AWS-Elasticsearch-service-version-1-5"><a href="#Create-and-configure-AWS-Elasticsearch-service-version-1-5" class="headerlink" title="Create and configure AWS Elasticsearch service (version 1.5)"></a>Create and configure AWS Elasticsearch service (version 1.5)</h2><h2 id="Migrate-the-data-Restore-cluster-from-S3-to-AWS-ES"><a href="#Migrate-the-data-Restore-cluster-from-S3-to-AWS-ES" class="headerlink" title="Migrate the data (Restore cluster from S3 to AWS ES)"></a>Migrate the data (Restore cluster from S3 to AWS ES)</h2><ul>
+<li><p>check current iam instance profile role on XXX ES hosts</p>
+<figure class="highlight dsconfig"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="string">aws</span> <span class="string">sts</span> <span class="built_in">get-caller-identity</span></span><br><span class="line"><span class="built_in">&#123;</span></span><br><span class="line"><span class="built_in"></span>    <span class="string">&quot;Account&quot;</span>: <span class="string">&quot;XXXXXXXXXXX&quot;</span>,</span><br><span class="line">    <span class="string">&quot;UserId&quot;</span>: <span class="string">&quot;AROAISLXH37RO7WDQU7H2:i-f9f6cf20&quot;</span>,</span><br><span class="line">    <span class="string">&quot;Arn&quot;</span>: <span class="string">&quot;arn:aws:sts::XXXXXXXXXXX:assumed-role/elasticsearch-cloud-aws/i-f9f6cf20&quot;</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>set snapshot repository for AWS managed ES</p>
+</li>
+</ul>
+<p>Must sign your snapshot requests, if your access policies specify IAM users or roles.</p>
+<p>p.s. If using curl will get the following error message:</p>
+<blockquote>
+<p>{“Message”:”User: anonymous is not authorized to perform: iam:PassRole on resource: arn:aws:iam::XXXXXXXXXXX:role/test-role”}</p>
+</blockquote>
+<p>Example code:</p>
+<figure class="highlight nix"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">python register_es_repo.py</span><br><span class="line"> </span><br><span class="line"><span class="built_in">import</span> boto3</span><br><span class="line"><span class="built_in">import</span> requests</span><br><span class="line"><span class="built_in">import</span> json</span><br><span class="line">from requests_aws4auth <span class="built_in">import</span> AWS4Auth</span><br><span class="line"> </span><br><span class="line"><span class="attr">host</span> = &#x27;https://vpc-es-XXX-prod-ji6wgswtt3btfue5pwqwgvudry.us-west-<span class="number">2</span>.es.amazonaws.com/&#x27;</span><br><span class="line"><span class="attr">region</span> = &#x27;us-west-<span class="number">2</span>&#x27;</span><br><span class="line"><span class="attr">service</span> = &#x27;es&#x27;</span><br><span class="line"><span class="attr">credentials</span> = boto3.Session().get_credentials()</span><br><span class="line"><span class="attr">awsauth</span> = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, <span class="attr">session_token=credentials.token)</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># Register repository</span></span><br><span class="line"><span class="attr">path</span> = &#x27;_snapshot/XXX-snapshot-s3-repo&#x27; <span class="comment"># the Elasticsearch API endpoint</span></span><br><span class="line"><span class="attr">url</span> = host + path</span><br><span class="line"> </span><br><span class="line"><span class="attr">payload</span> = &#123;</span><br><span class="line">  <span class="string">&quot;type&quot;</span>: <span class="string">&quot;s3&quot;</span>,</span><br><span class="line">  <span class="string">&quot;settings&quot;</span>: &#123;</span><br><span class="line">    <span class="string">&quot;bucket&quot;</span>: <span class="string">&quot;es-backup&quot;</span>,</span><br><span class="line">    <span class="string">&quot;region&quot;</span>: <span class="string">&quot;us-west-2&quot;</span>,</span><br><span class="line">    <span class="string">&quot;role_arn&quot;</span>: <span class="string">&quot;arn:aws:iam::XXXXXXXXXX:role/elasticsearch-cloud-aws&quot;</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"> </span><br><span class="line"><span class="attr">headers</span> = &#123;<span class="string">&quot;Content-Type&quot;</span>: <span class="string">&quot;application/json&quot;</span>&#125;</span><br><span class="line"> </span><br><span class="line"><span class="attr">r</span> = requests.put(url, <span class="attr">auth=awsauth,</span> <span class="attr">json=payload,</span> <span class="attr">headers=headers)</span></span><br><span class="line"> </span><br><span class="line">print(r.status_code)</span><br><span class="line">print(r.text)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="comment"># Output</span></span><br><span class="line"><span class="number">200</span></span><br><span class="line">&#123;<span class="string">&quot;acknowledged&quot;</span>:<span class="literal">true</span>&#125;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>check snapshot repository settings</p>
+<figure class="highlight powershell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">curl</span> <span class="literal">-XGET</span> <span class="variable">$es</span>/_snapshot?pretty</span><br><span class="line"> </span><br><span class="line">&#123;</span><br><span class="line">  <span class="string">&quot;XXX-snapshot-s3-repo&quot;</span> : &#123;</span><br><span class="line">    <span class="string">&quot;type&quot;</span> : <span class="string">&quot;s3&quot;</span>,</span><br><span class="line">    <span class="string">&quot;settings&quot;</span> : &#123;</span><br><span class="line">      <span class="string">&quot;bucket&quot;</span> : <span class="string">&quot;es-backup&quot;</span>,</span><br><span class="line">      <span class="string">&quot;role_arn&quot;</span> : <span class="string">&quot;arn:aws:iam::XXXXXXXXXXX:role/aws-elasticsearch-backup&quot;</span>,</span><br><span class="line">      <span class="string">&quot;region&quot;</span> : <span class="string">&quot;us-west-2&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>update search index settings to speed up restore process</p>
+</li>
+</ul>
+<figure class="highlight arduino"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta"># https:<span class="comment">//aws.amazon.com/premiumsupport/knowledge-center/elasticsearch-indexing-performance/</span></span></span><br><span class="line"># For huge index, reduce from <span class="number">30</span><span class="built_in">min</span> to <span class="number">10</span><span class="built_in">min</span> together with incremental snapshot:</span><br><span class="line"> </span><br><span class="line"><span class="meta"># before migration</span></span><br><span class="line">curl -XPUT <span class="string">&quot;$es/search/_settings&quot;</span> -d<span class="number">&#x27;</span> &#123;</span><br><span class="line">        <span class="string">&quot;number_of_replicas&quot;</span> : <span class="number">0</span>,</span><br><span class="line">        <span class="string">&quot;refresh_interval&quot;</span> : <span class="string">&quot;-1&quot;</span></span><br><span class="line">&#125;&#x27;</span><br><span class="line"> </span><br><span class="line"><span class="meta"># set it back after migration</span></span><br><span class="line">curl -XPUT <span class="string">&quot;$es/search/_settings&quot;</span> -d<span class="number">&#x27;</span> &#123;</span><br><span class="line">        <span class="string">&quot;number_of_replicas&quot;</span> : <span class="number">1</span>,</span><br><span class="line">        <span class="string">&quot;refresh_interval&quot;</span> : <span class="string">&quot;1s&quot;</span></span><br><span class="line">&#125;&#x27;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>restore snapshots from S3 into AWS managed ES</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># e.g restore from specific snapshot</span></span><br><span class="line">curl -XPOST <span class="string">&quot;<span class="variable">$es</span>/_snapshot/XXX-snapshot-s3-repo/marvel-20191024/_restore&quot;</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># e.g. restore just one index, &quot;.marvel-2019.10.24&quot;, from &quot;marvel-20191024&quot; snapshot in the &quot;XXX-snapshot-s3-repo&quot; snapshot repository:</span></span><br><span class="line">curl -XPOST <span class="string">&quot;<span class="variable">$es</span>/_snapshot/XXX-snapshot-s3-repo/marvel-20191024/_restore&quot;</span> -d <span class="string">&#x27;&#123;&quot;indices&quot;: &quot;.marvel-2019.10.24&quot;&#125;&#x27;</span> -H <span class="string">&#x27;Content-Type: application/json&#x27;</span></span><br><span class="line"> </span><br><span class="line"><span class="comment"># e.g restore all indices except for the .kibana index</span></span><br><span class="line">curl -XPOST <span class="string">&quot;<span class="variable">$es</span>/_snapshot/XXX-snapshot-s3-repo/marvel-20191024/_restore&quot;</span> -d <span class="string">&#x27;&#123;&quot;indices&quot;: &quot;*,-.kibana&quot;&#125;&#x27;</span> -H <span class="string">&#x27;Content-Type: application/json&#x27;</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Run <code>es_migrate.sh</code> script to snapshot / restore</p>
+</li>
+</ul>
+<figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">time</span> bash -x es_migrate.sh</span><br><span class="line"> </span><br><span class="line"><span class="attribute">real</span>    <span class="number">10</span>m<span class="number">7</span>.<span class="number">667</span>s</span><br><span class="line"><span class="attribute">user</span>    <span class="number">0</span>m<span class="number">0</span>.<span class="number">129</span>s</span><br><span class="line"><span class="attribute">sys</span> <span class="number">0</span>m<span class="number">0</span>.<span class="number">142</span>s</span><br></pre></td></tr></table></figure>
+
+<h2 id="Switch-from-self-hosted-to-AWS-managed-ES"><a href="#Switch-from-self-hosted-to-AWS-managed-ES" class="headerlink" title="Switch from self-hosted to AWS managed ES"></a>Switch from self-hosted to AWS managed ES</h2><p>get ECS task parameter settings and set ES endpoint to AWS managed ES for application</p>
+<h2 id="Testing"><a href="#Testing" class="headerlink" title="Testing"></a>Testing</h2><ul>
+<li>General function testing</li>
+<li>Rollback to old ELB in CNAME if errors</li>
+<li>Data Integration Check</li>
+</ul>
+<p>Will generate <code>doc_count</code> diff result for old / new ES (take index <code>.marvel-*</code> for example):</p>
+<figure class="highlight tap"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#index  old_doc_count   new_doc_count   diff_rate</span></span><br><span class="line"> </span><br><span class="line">.marvel-2019.11.08 <span class="number"> 114929 </span>    <span class="number"> 114929 </span>     0.0000%</span><br><span class="line">.marvel-2019.11.09 <span class="number"> 114930 </span>    <span class="number"> 114930 </span>     0.0000%</span><br><span class="line">.marvel-2019.11.10 <span class="number"> 114904 </span>    <span class="number"> 114904 </span>     0.0000%</span><br><span class="line">.marvel-2019.11.11 <span class="number"> 104327 </span>    <span class="number"> 103532 </span>     -0.7620%</span><br><span class="line">search             <span class="number"> 21025214 </span>  <span class="number"> 21025162 </span>   -0.0002%</span><br><span class="line">site-1.0           <span class="number"> 939656 </span>    <span class="number"> 939657 </span>     0.0001%</span><br><span class="line">site_v1            <span class="number"> 324638 </span>    <span class="number"> 324638 </span>     0.0000%</span><br><span class="line"> </span><br><span class="line">real    10m7.303s</span><br><span class="line">user    0m0.156s</span><br><span class="line">sys 0m0.121s</span><br></pre></td></tr></table></figure>
+
+<h2 id="Tidy-up-resources-in-Puppet-Terraform"><a href="#Tidy-up-resources-in-Puppet-Terraform" class="headerlink" title="Tidy up resources in Puppet / Terraform"></a>Tidy up resources in Puppet / Terraform</h2><p>The last step is that clean up old resources in Puppet or Terraform (e.g. EC2 / SG / Route53 etc.)</p>
+<h1 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h1><p><span class="exturl" data-url="aHR0cHM6Ly9hd3MuYW1hem9uLmNvbS9wcmVtaXVtc3VwcG9ydC9rbm93bGVkZ2UtY2VudGVyL2VsYXN0aWNzZWFyY2gtaW5kZXhpbmctcGVyZm9ybWFuY2Uv" title="https://aws.amazon.com/premiumsupport/knowledge-center/elasticsearch-indexing-performance/">knowledge-center/elasticsearch-indexing-performance<i class="fa fa-external-link"></i></span></p>
+<p><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL2VsYXN0aWNzZWFyY2gtc2VydmljZS9sYXRlc3QvZGV2ZWxvcGVyZ3VpZGUvc2l6aW5nLWRvbWFpbnMuaHRtbA==" title="https://docs.aws.amazon.com/elasticsearch-service/latest/developerguide/sizing-domains.html">AWS - sizing domains<i class="fa fa-external-link"></i></span></p>
+<p><span class="exturl" data-url="aHR0cHM6Ly9tZWRpdW0uY29tL2tyYWtlbnN5c3RlbXMtYmxvZy9taWdyYXRpbmcteW91ci1zZWxmLWhvc3RlZC1lbGFzdGljc2VhcmNoLXRvLWF3cy1lbGFzdGljc2VhcmNoLXNlcnZpY2UtYS1kZXRhaWxlZC1ndWlkZS1mZjIyZWZlZGU1YTM=" title="https://medium.com/krakensystems-blog/migrating-your-self-hosted-elasticsearch-to-aws-elasticsearch-service-a-detailed-guide-ff22efede5a3">Migrating your self-hosted ElasticSearch to AWS ElasticSearch Service<i class="fa fa-external-link"></i></span></p>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    Donate
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="David Lu WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="David Lu Alipay">
+        <p>Alipay</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>Welcome to my other publishing channels</p>
+
+    <div class="social-list">
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="https://twitter.com/davidlu1001">
+                <span class="icon">
+                  <i class="fa fa-twitter"></i>
+                </span>
+
+                <span class="label">Twitter</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="https://t.me/nztrain">
+                <span class="icon">
+                  <i class="fa fa-telegram"></i>
+                </span>
+
+                <span class="label">Telegram</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+                <span class="icon">
+                  <i class="fa fa-wechat"></i>
+                </span>
+
+                <span class="label">WeChat</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="/atom.xml">
+                <span class="icon">
+                  <i class="fa fa-rss"></i>
+                </span>
+
+                <span class="label">RSS</span>
+              </a>
+            </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/AWS/" rel="tag"><i class="fa fa-tag"></i> AWS</a>
+              <a href="/tags/ElasticSearch/" rel="tag"><i class="fa fa-tag"></i> ElasticSearch</a>
+              <a href="/tags/SRE/" rel="tag"><i class="fa fa-tag"></i> SRE</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2019/08/13/How-to-use-Terraform-include-exclude/" rel="prev" title="How to use Terraform include / exclude with Makefile">
+      <i class="fa fa-chevron-left"></i> How to use Terraform include / exclude with Makefile
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2019/11/22/Zookeeper-Upgrade-Checklist/" rel="next" title="Zookeeper Upgrade Checklist">
+      Zookeeper Upgrade Checklist <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Background"><span class="nav-number">1.</span> <span class="nav-text">Background</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Solution-overview"><span class="nav-number">2.</span> <span class="nav-text">Solution overview</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Checklist"><span class="nav-number">3.</span> <span class="nav-text">Checklist</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Assess-and-analyse-current-data"><span class="nav-number">3.1.</span> <span class="nav-text">Assess and analyse current data</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Create-an-S3-bucket-for-current-Elasticsearch-data-on-EC2"><span class="nav-number">3.2.</span> <span class="nav-text">Create an S3 bucket for current Elasticsearch data (on EC2)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Make-ES-Cluster-snapshot-and-move-it-to-S3"><span class="nav-number">3.3.</span> <span class="nav-text">Make ES Cluster snapshot and move it to S3</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Create-and-configure-AWS-Elasticsearch-service-version-1-5"><span class="nav-number">3.4.</span> <span class="nav-text">Create and configure AWS Elasticsearch service (version 1.5)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Migrate-the-data-Restore-cluster-from-S3-to-AWS-ES"><span class="nav-number">3.5.</span> <span class="nav-text">Migrate the data (Restore cluster from S3 to AWS ES)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Switch-from-self-hosted-to-AWS-managed-ES"><span class="nav-number">3.6.</span> <span class="nav-text">Switch from self-hosted to AWS managed ES</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Testing"><span class="nav-number">3.7.</span> <span class="nav-text">Testing</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Tidy-up-resources-in-Puppet-Terraform"><span class="nav-number">3.8.</span> <span class="nav-text">Tidy up resources in Puppet &#x2F; Terraform</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Reference"><span class="nav-number">4.</span> <span class="nav-text">Reference</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">David Lu</p>
+  <div class="site-description" itemprop="description">Technology enthusiast</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;davidlu1001"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly90d2l0dGVyLmNvbS9kYXZpZGx1MTAwMQ==" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;davidlu1001"><i class="fa fa-fw fa-twitter"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOmRhdmlkbHUxMDAxQGdtYWlsLmNvbQ==" title="E-Mail → mailto:davidlu1001@gmail.com"><i class="fa fa-fw fa-envelope"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Lu</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">101k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:32</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://davidlu1001.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://davidlu1001.github.io/2019/11/12/ElasticSearch-Migration-to-AWS/";
+    this.page.identifier = "2019/11/12/ElasticSearch-Migration-to-AWS/";
+    this.page.title = "ElasticSearch migrated from EC2 to AWS managed ES";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://davidlu1001.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>

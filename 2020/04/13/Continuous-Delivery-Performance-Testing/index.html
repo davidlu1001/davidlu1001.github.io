@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 5.2.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta http-equiv="Cache-Control" content="no-siteapp">
+  <meta name="google-site-verification" content="AIn6RYiH7oyvpWJuW_neCErD4pn7Iy9IcaCwwDr7wJg">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"davidlu1001.github.io","root":"/","scheme":"Pisces","version":"7.7.2","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+  </script>
+
+  <meta name="description" content="IntroductionThis blog describes performance testing results of the continuous delivery (CD) workflow. Testing was performed to answer two questions:  Which Docker storage engine is optimal for the con">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Continuous Delivery Performance Testing">
+<meta property="og:url" content="http://davidlu1001.github.io/2020/04/13/Continuous-Delivery-Performance-Testing/index.html">
+<meta property="og:site_name" content="Davidlu&#39;s Blog">
+<meta property="og:description" content="IntroductionThis blog describes performance testing results of the continuous delivery (CD) workflow. Testing was performed to answer two questions:  Which Docker storage engine is optimal for the con">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3113154-3a0cbe9cba880e99.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3113154-2595c65d154f95da.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/3113154-d0ab2c63ce95e49c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+<meta property="article:published_time" content="2020-04-13T10:08:58.000Z">
+<meta property="article:modified_time" content="2020-12-11T09:52:39.131Z">
+<meta property="article:author" content="David Lu">
+<meta property="article:tag" content="DevOps">
+<meta property="article:tag" content="Performance Testing">
+<meta property="article:tag" content="CI &#x2F; CD">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/3113154-3a0cbe9cba880e99.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
+
+<link rel="canonical" href="http://davidlu1001.github.io/2020/04/13/Continuous-Delivery-Performance-Testing/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true
+  };
+</script>
+
+  <title>Continuous Delivery Performance Testing | Davidlu's Blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-62146539-2"></script>
+    <script>
+      if (CONFIG.hostname === location.hostname) {
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'UA-62146539-2');
+      }
+    </script>
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+<link rel="alternate" href="/atom.xml" title="Davidlu's Blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Davidlu's Blog</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+      
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-tags">
+
+    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">26</span></a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">15</span></a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">17</span></a>
+
+  </li>
+        <li class="menu-item menu-item-sitemap">
+
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>Search
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="search-pop-overlay">
+  <div class="popup search-popup">
+      <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+           placeholder="Searching..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result">
+  <div id="no-result">
+    <i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>
+  </div>
+</div>
+
+  </div>
+</div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+    <link itemprop="mainEntityOfPage" href="http://davidlu1001.github.io/2020/04/13/Continuous-Delivery-Performance-Testing/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="David Lu">
+      <meta itemprop="description" content="Technology enthusiast">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Davidlu's Blog">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          Continuous Delivery Performance Testing
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+
+              <time title="Created: 2020-04-13 22:08:58" itemprop="dateCreated datePublished" datetime="2020-04-13T22:08:58+12:00">2020-04-13</time>
+            </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              <span class="post-meta-item-text">In</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/DevOps/" itemprop="url" rel="index"><span itemprop="name">DevOps</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Performance/" itemprop="url" rel="index"><span itemprop="name">Performance</span></a>
+                </span>
+                  , 
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Testing/" itemprop="url" rel="index"><span itemprop="name">Testing</span></a>
+                </span>
+            </span>
+
+          
+            <span class="post-meta-item" title="Views" id="busuanzi_container_page_pv" style="display: none;">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-eye"></i>
+              </span>
+              <span class="post-meta-item-text">Views: </span>
+              <span id="busuanzi_value_page_pv"></span>
+            </span>
+  
+  <span class="post-meta-item">
+    
+      <span class="post-meta-item-icon">
+        <i class="fa fa-comment-o"></i>
+      </span>
+      <span class="post-meta-item-text">Disqus: </span>
+    
+    <a title="disqus" href="/2020/04/13/Continuous-Delivery-Performance-Testing/#disqus_thread" itemprop="discussionUrl">
+      <span class="post-comments-count disqus-comment-count" data-disqus-identifier="2020/04/13/Continuous-Delivery-Performance-Testing/" itemprop="commentCount"></span>
+    </a>
+  </span>
+  
+  <br>
+            <span class="post-meta-item" title="Symbols count in article">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-file-word-o"></i>
+              </span>
+                <span class="post-meta-item-text">Symbols count in article: </span>
+              <span>6.9k</span>
+            </span>
+            <span class="post-meta-item" title="Reading time">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-clock-o"></i>
+              </span>
+                <span class="post-meta-item-text">Reading time &asymp;</span>
+              <span>6 mins.</span>
+            </span>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h1><p>This blog describes performance testing results of the continuous delivery (CD) workflow. Testing was performed to answer two questions:</p>
+<ol>
+<li>Which Docker storage engine is optimal for the continuous delivery workflow?</li>
+<li>Which EC2 instance types perform best in terms of price and performance?</li>
+</ol>
+<h1 id="Test-Conditions"><a href="#Test-Conditions" class="headerlink" title="Test Conditions"></a>Test Conditions</h1><p>All testing was performed with the following conditions:</p>
+<ul>
+<li>Ubuntu <code>15.10</code></li>
+<li>Docker <code>1.10.3</code></li>
+<li>Docker Compose <code>1.6.2</code></li>
+<li>All required Docker images cached in a local registry mirror to minimise network variations</li>
+<li>All required Python wheels cached in a local Devpi mirror to minimise network variations</li>
+<li>Empty docker data volume (/var/lib/docker) as starting state for each test</li>
+</ul>
+<p>Testing was performed for the internal web application. The test stage that was executed includes the following tasks:</p>
+<ul>
+<li>Pull base image</li>
+<li>Build development image - this includes installing OS packages, building Python wheels and installing Python wheels</li>
+<li>Run unit and integration tests</li>
+</ul>
+<h1 id="Docker-Storage-Engine-Comparison"><a href="#Docker-Storage-Engine-Comparison" class="headerlink" title="Docker Storage Engine Comparison"></a>Docker Storage Engine Comparison</h1><p>The Docker storage engine comparison was performed on a single EC2 instance with the following configuration:</p>
+<ul>
+<li>c4.large instance</li>
+<li>2 x 16GB SSD disks attached as instance stores configure in a software RAID0 configuration unless otherwise noted. These disks were used for Docker data storage (i.e. mounted at /var/lib/docker)</li>
+<li>ext4 file system used unless otherwise noted</li>
+<li>30GB EBS volume attached as main OS volume</li>
+</ul>
+<h2 id="Test-Scenarios"><a href="#Test-Scenarios" class="headerlink" title="Test Scenarios"></a>Test Scenarios</h2><p>The following table describes each scenario that was tested.</p>
+<p>It should be noted that some storage engines are more complex to setup than others. A low complexity rating means minimal configuration is required to enable the storage engine, whereas a high complexity rating means significant configuration is required to enable the storage engine (e.g. requires separate block storage)</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th align="center">Description</th>
+<th align="center">Complexity</th>
+<th align="right">More Information</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ZFS</td>
+<td align="center">ZFS storage engine using software RAID0 (zfs file system)</td>
+<td align="center">High</td>
+<td align="right"><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmRvY2tlci5jb20vZW5naW5lL3VzZXJndWlkZS9zdG9yYWdlZHJpdmVyL3pmcy1kcml2ZXIv" title="https://docs.docker.com/engine/userguide/storagedriver/zfs-driver/">https://docs.docker.com/engine/userguide/storagedriver/zfs-driver/<i class="fa fa-external-link"></i></span><br><span class="exturl" data-url="aHR0cHM6Ly93aWtpLnVidW50dS5jb20vS2VybmVsL1JlZmVyZW5jZS9aRlM=" title="https://wiki.ubuntu.com/Kernel/Reference/ZFS">https://wiki.ubuntu.com/Kernel/Reference/ZFS<i class="fa fa-external-link"></i></span></td>
+</tr>
+<tr>
+<td>ZFS (ZRAID0)</td>
+<td align="center">ZFS storage engine using native ZFS disk striping (zfs file system)</td>
+<td align="center">High</td>
+<td align="right"><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmRvY2tlci5jb20vZW5naW5lL3VzZXJndWlkZS9zdG9yYWdlZHJpdmVyL3pmcy1kcml2ZXIv" title="https://docs.docker.com/engine/userguide/storagedriver/zfs-driver/">https://docs.docker.com/engine/userguide/storagedriver/zfs-driver/<i class="fa fa-external-link"></i></span><br><span class="exturl" data-url="aHR0cHM6Ly93aWtpLnVidW50dS5jb20vS2VybmVsL1JlZmVyZW5jZS9aRlM=" title="https://wiki.ubuntu.com/Kernel/Reference/ZFS">https://wiki.ubuntu.com/Kernel/Reference/ZFS<i class="fa fa-external-link"></i></span></td>
+</tr>
+<tr>
+<td>Device Mapper (direct-lvm)</td>
+<td align="center">Device Mapper storage engine using recommended direct-lvm mode</td>
+<td align="center">High</td>
+<td align="right"><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmRvY2tlci5jb20vZW5naW5lL3VzZXJndWlkZS9zdG9yYWdlZHJpdmVyL2RldmljZS1tYXBwZXItZHJpdmVyLyNjb25maWd1cmUtZGlyZWN0LWx2bS1tb2RlLWZvci1wcm9k" title="https://docs.docker.com/engine/userguide/storagedriver/device-mapper-driver/#configure-direct-lvm-mode-for-prod">https://docs.docker.com/engine/userguide/storagedriver/device-mapper-driver/#configure-direct-lvm-mode-for-prod<i class="fa fa-external-link"></i></span></td>
+</tr>
+<tr>
+<td>Device Mapper (loop)</td>
+<td align="center">Device Mapper storage engine using default loop mode.<br>This is the default storage engine on Ubuntu 15.10 and many Linux distributions.</td>
+<td align="center">Low</td>
+<td align="right"><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmRvY2tlci5jb20vZW5naW5lL3VzZXJndWlkZS9zdG9yYWdlZHJpdmVyL2RldmljZS1tYXBwZXItZHJpdmVyLyNkb2NrZXItYW5kLXRoZS1kZXZpY2UtbWFwcGVyLXN0b3I=" title="https://docs.docker.com/engine/userguide/storagedriver/device-mapper-driver/#docker-and-the-device-mapper-stor">https://docs.docker.com/engine/userguide/storagedriver/device-mapper-driver/#docker-and-the-device-mapper-stor<i class="fa fa-external-link"></i></span></td>
+</tr>
+<tr>
+<td>BTRFS</td>
+<td align="center">BTRFS storage engine (btrfs file system)</td>
+<td align="center">Higg</td>
+<td align="right"><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmRvY2tlci5jb20vZW5naW5lL3VzZXJndWlkZS9zdG9yYWdlZHJpdmVyL2J0cmZzLWRyaXZlci8=" title="https://docs.docker.com/engine/userguide/storagedriver/btrfs-driver/">https://docs.docker.com/engine/userguide/storagedriver/btrfs-driver/<i class="fa fa-external-link"></i></span></td>
+</tr>
+<tr>
+<td>Overlay</td>
+<td align="center">Overlay storage engine</td>
+<td align="center">Low</td>
+<td align="right"><span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmRvY2tlci5jb20vZW5naW5lL3VzZXJndWlkZS9zdG9yYWdlZHJpdmVyL292ZXJsYXlmcy1kcml2ZXIv" title="https://docs.docker.com/engine/userguide/storagedriver/overlayfs-driver/">https://docs.docker.com/engine/userguide/storagedriver/overlayfs-driver/<i class="fa fa-external-link"></i></span></td>
+</tr>
+</tbody></table>
+<p>P.S.</p>
+<blockquote>
+<p>The original Docker storage engine, AUFS, was not considered given it is not supported in mainline Linux kernel.</p>
+</blockquote>
+<h2 id="Test-Results"><a href="#Test-Results" class="headerlink" title="Test Results"></a>Test Results</h2><p>The following chart illustrates the results:</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/3113154-3a0cbe9cba880e99.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h2 id="Issues"><a href="#Issues" class="headerlink" title="Issues"></a>Issues</h2><p>Initial testing was performed using the xfs file system, however this caused a failure during Docker image building when using the Overlay storage driver. This triggered a decision to use ext4 instead as the standard file system.</p>
+<h1 id="EC2-Instance-Type-Comparison"><a href="#EC2-Instance-Type-Comparison" class="headerlink" title="EC2 Instance Type Comparison"></a>EC2 Instance Type Comparison</h1><p>Testing was performed on various EC2 instance types to determine which EC2 instance types perform the best, both in terms of raw performance and price / performance.</p>
+<p>The price / performance comparison was calculated by computing the base cost of how much each run (in terms of time taken) cost on each instance type. Additional storage costs were not included in the calculation.</p>
+<h2 id="Test-Scenarios-1"><a href="#Test-Scenarios-1" class="headerlink" title="Test Scenarios"></a>Test Scenarios</h2><p>The following table describes each scenario that was tested.</p>
+<table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th align="center">Instance Cost Per Hour (USD)</th>
+<th align="right">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>m3.medium (EBS)</td>
+<td align="center">0.093</td>
+<td align="right">M3 Medium instance with single 30GB EBS Volume</td>
+</tr>
+<tr>
+<td>r3.large (SSD)</td>
+<td align="center">0.20 + additional storage</td>
+<td align="right">R3 Large instance with single 30GB EBS Volume and 30GB SSD instance store volume.<br>The SSD instance store was used for the Docker data volume (/var/lib/docker)</td>
+</tr>
+<tr>
+<td>t2.medium (EBS)</td>
+<td align="center">0.08</td>
+<td align="right">T2 Medium instance with single 30GB EBS Volume</td>
+</tr>
+<tr>
+<td>c3.large (SSD)</td>
+<td align="center">0.132 + additional storage</td>
+<td align="right">C3 Large instance with single 30GB EBS Volume and 2x16GB SSD instance store volumes configured in software RAID0 configuration.<br>The SSD RAID0 volume was used for the Docker data volume (/var/lib/docker)</td>
+</tr>
+<tr>
+<td>c4.large (EBS)</td>
+<td align="center">0.137</td>
+<td align="right">C4 Large instance with single 30GB EBS Volume</td>
+</tr>
+<tr>
+<td>c4.large (Separate EBS)</td>
+<td align="center">0.137 + additional storage</td>
+<td align="right">C4 Large instance with separate 30GB EBS Volume for Docker data volume (/var/lib/docker)</td>
+</tr>
+<tr>
+<td>c4.large (RAID0 EBS</td>
+<td align="center">0.137 + additional storage</td>
+<td align="right">C4 Large instance with 2 x separate 30GB EBS Volume configured in software RAID0 for Docker data volume (/var/lib/docker)</td>
+</tr>
+</tbody></table>
+<h2 id="Test-Results-Performance"><a href="#Test-Results-Performance" class="headerlink" title="Test Results (Performance)"></a>Test Results (Performance)</h2><p>The following chart illustrates the results in terms of performance:</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/3113154-2595c65d154f95da.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h2 id="Test-Results-Price-Performance"><a href="#Test-Results-Price-Performance" class="headerlink" title="Test Results (Price / Performance)"></a>Test Results (Price / Performance)</h2><p>The following chart illustrates the results in terms of price / performance:</p>
+<p><img src="https://upload-images.jianshu.io/upload_images/3113154-d0ab2c63ce95e49c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt=""></p>
+<h1 id="Conclusions"><a href="#Conclusions" class="headerlink" title="Conclusions"></a>Conclusions</h1><h2 id="Storage-Engine"><a href="#Storage-Engine" class="headerlink" title="Storage Engine"></a>Storage Engine</h2><p>The <code>overlay storage engine</code> appears to provide the best performance for the tested continuous delivery workflow.</p>
+<p>Given the overlay storage engine has low complexity and is easy to configure out of the box, this is the recommended storage engine for continuous delivery workflows.</p>
+<p>An interesting observation was the performance of DeviceMapper direct-lvm mode (this is the storage engine configuration for AWS Linux ECS-optimised instances) vs loop mode. In principle, direct-lvm mode should offer better performance but this was not observed.</p>
+<h2 id="EC2-Instance-Type-Price-Performance"><a href="#EC2-Instance-Type-Price-Performance" class="headerlink" title="EC2 Instance Type Price / Performance"></a>EC2 Instance Type Price / Performance</h2><p>The testing clearly discounted m3.medium and r3.large instance types as not suitable for the Continuous Delivery workflow. The m3.medium instance took twice as long to execute, whilst the r3.large performance was comparable to the t2.medium performance at 2.5x the price.</p>
+<p>Interestingly, the use of SSD instance stores did not result in any performance improvements and the best performance result was achieved on a c4.large with EBS storage.</p>
+<p>The use of dedicated and/or multiple EBS volumes configured in a RAID0 configuration also did not result in any measurable increase in performance.</p>
+<p>The t2.medium instance type offers the best value for money of the instance types tested, however offers burst CPU performance that can be exhausted, and the impact of running continuous delivery workflows in terms of CPU credits must be further understood.</p>
+<p>The <code>c4.large</code> instance type offers the best performance of the instance types and was second most cost effective. This instance type is tailored towards CPU intensive workloads, offering better peak performance than the t2.medium (8 ECUs vs 6.5 ECUs) and does not incur the risk of exhausting CPU credits. The c4.large also is EBS optimised with 500Mbps dedicated EBS bandwidth and support enhanced networking (t2.medium does not support either of these enhancements).</p>
+<h2 id="End-to-End-Workflow-Testing"><a href="#End-to-End-Workflow-Testing" class="headerlink" title="End-to-End Workflow Testing"></a>End-to-End Workflow Testing</h2><p>Based upon <code>t2.medium</code> and <code>c4.large</code> being identified as the preferred instance types, additional testing of the workflow was conducted for these instance types. All testing was performed using the overlay storage driver.</p>
+<p>The end-to-end workflow and results are described in the table below. Note the make tag and make publish steps were excluded as these steps are dependent on network performance to Docker Hub.</p>
+<table>
+<thead>
+<tr>
+<th>Workflow Step</th>
+<th align="center">c4.large (seconds)</th>
+<th align="center">t2.medium (seconds)</th>
+<th align="right">Description</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>make test</td>
+<td align="center">299</td>
+<td align="center">367</td>
+<td align="right"><ul><li> Pull base image</li><li> Build development image - this includes installed OS packages, building Python wheels and installing Python wheels </li><li> Run unit and integration tests</td>
+</tr>
+<tr>
+<td>make database aws</td>
+<td align="center">38</td>
+<td align="center">36</td>
+<td align="right">Mount database volume from EBS snapshot</td>
+</tr>
+<tr>
+<td>make toast</td>
+<td align="center">153</td>
+<td align="center">150</td>
+<td align="right">Warms database volume</td>
+</tr>
+<tr>
+<td>make release</td>
+<td align="center">333</td>
+<td align="center">363</td>
+<td align="right"><ul><li>Pull release environment and acceptance testing images (mysql, redis, nginx, selenium, robot) </li><li> Build release image </li><li> Start release environment </li><li> Run acceptance tests</td>
+</tr>
+<tr>
+<td>Total Time</td>
+<td align="center">13m43s</td>
+<td align="center">15m16s</td>
+<td align="right"></td>
+</tr>
+<tr>
+<td>Total Run Cost (cents)</td>
+<td align="center">3.13</td>
+<td align="center">2.04</td>
+<td align="right"></td>
+</tr>
+</tbody></table>
+
+    </div>
+
+    
+    
+    
+        <div class="reward-container">
+  <div></div>
+  <button onclick="var qr = document.getElementById('qr'); qr.style.display = (qr.style.display === 'none') ? 'block' : 'none';">
+    Donate
+  </button>
+  <div id="qr" style="display: none;">
+      
+      <div style="display: inline-block;">
+        <img src="/images/wechatpay.png" alt="David Lu WeChat Pay">
+        <p>WeChat Pay</p>
+      </div>
+      
+      <div style="display: inline-block;">
+        <img src="/images/alipay.png" alt="David Lu Alipay">
+        <p>Alipay</p>
+      </div>
+
+  </div>
+</div>
+
+        
+
+  <div class="followme">
+    <p>Welcome to my other publishing channels</p>
+
+    <div class="social-list">
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="https://twitter.com/davidlu1001">
+                <span class="icon">
+                  <i class="fa fa-twitter"></i>
+                </span>
+
+                <span class="label">Twitter</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="https://t.me/nztrain">
+                <span class="icon">
+                  <i class="fa fa-telegram"></i>
+                </span>
+
+                <span class="label">Telegram</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+                <span class="icon">
+                  <i class="fa fa-wechat"></i>
+                </span>
+
+                <span class="label">WeChat</span>
+              </a>
+            </div>
+
+            <div class="social-item">
+              <a target="_blank" class="social-link" href="/atom.xml">
+                <span class="icon">
+                  <i class="fa fa-rss"></i>
+                </span>
+
+                <span class="label">RSS</span>
+              </a>
+            </div>
+    </div>
+  </div>
+
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/DevOps/" rel="tag"><i class="fa fa-tag"></i> DevOps</a>
+              <a href="/tags/Performance-Testing/" rel="tag"><i class="fa fa-tag"></i> Performance Testing</a>
+              <a href="/tags/CI-CD/" rel="tag"><i class="fa fa-tag"></i> CI / CD</a>
+          </div>
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/08/Elasticsearch-important-settings/" rel="prev" title="Elasticsearch important settings">
+      <i class="fa fa-chevron-left"></i> Elasticsearch important settings
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/16/ElasticSearch-Runbook/" rel="next" title="ElasticSearch Runbook">
+      ElasticSearch Runbook <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    
+  <div class="comments">
+    <div id="disqus_thread">
+      <noscript>Please enable JavaScript to view the comments powered by Disqus.</noscript>
+    </div>
+  </div>
+  
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Introduction"><span class="nav-number">1.</span> <span class="nav-text">Introduction</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Test-Conditions"><span class="nav-number">2.</span> <span class="nav-text">Test Conditions</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Docker-Storage-Engine-Comparison"><span class="nav-number">3.</span> <span class="nav-text">Docker Storage Engine Comparison</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Test-Scenarios"><span class="nav-number">3.1.</span> <span class="nav-text">Test Scenarios</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Test-Results"><span class="nav-number">3.2.</span> <span class="nav-text">Test Results</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Issues"><span class="nav-number">3.3.</span> <span class="nav-text">Issues</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#EC2-Instance-Type-Comparison"><span class="nav-number">4.</span> <span class="nav-text">EC2 Instance Type Comparison</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Test-Scenarios-1"><span class="nav-number">4.1.</span> <span class="nav-text">Test Scenarios</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Test-Results-Performance"><span class="nav-number">4.2.</span> <span class="nav-text">Test Results (Performance)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Test-Results-Price-Performance"><span class="nav-number">4.3.</span> <span class="nav-text">Test Results (Price &#x2F; Performance)</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Conclusions"><span class="nav-number">5.</span> <span class="nav-text">Conclusions</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Storage-Engine"><span class="nav-number">5.1.</span> <span class="nav-text">Storage Engine</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#EC2-Instance-Type-Price-Performance"><span class="nav-number">5.2.</span> <span class="nav-text">EC2 Instance Type Price &#x2F; Performance</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#End-to-End-Workflow-Testing"><span class="nav-number">5.3.</span> <span class="nav-text">End-to-End Workflow Testing</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">David Lu</p>
+  <div class="site-description" itemprop="description">Technology enthusiast</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">17</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">15</span>
+        <span class="site-state-item-name">categories</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+          
+        <span class="site-state-item-count">26</span>
+        <span class="site-state-item-name">tags</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;davidlu1001"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly90d2l0dGVyLmNvbS9kYXZpZGx1MTAwMQ==" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;davidlu1001"><i class="fa fa-fw fa-twitter"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="bWFpbHRvOmRhdmlkbHUxMDAxQGdtYWlsLmNvbQ==" title="E-Mail → mailto:davidlu1001@gmail.com"><i class="fa fa-fw fa-envelope"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2015 – 
+  <span itemprop="copyrightYear">2020</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">David Lu</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-area-chart"></i>
+    </span>
+    <span title="Symbols count total">101k</span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item-icon">
+      <i class="fa fa-coffee"></i>
+    </span>
+    <span title="Reading time total">1:32</span>
+</div>
+
+        
+<div class="busuanzi-count">
+  <script async src="https://busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+    <span class="post-meta-item" id="busuanzi_container_site_uv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-user"></i>
+      </span>
+      <span class="site-uv" title="Total Visitors">
+        <span id="busuanzi_value_site_uv"></span>
+      </span>
+    </span>
+    <span class="post-meta-divider">|</span>
+    <span class="post-meta-item" id="busuanzi_container_site_pv" style="display: none;">
+      <span class="post-meta-item-icon">
+        <i class="fa fa-eye"></i>
+      </span>
+      <span class="site-pv" title="Total Views">
+        <span id="busuanzi_value_site_pv"></span>
+      </span>
+    </span>
+</div>
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/pisces.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+  
+<script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+<script>
+  function loadCount() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://davidlu1001.disqus.com/count.js';
+    s.id = 'dsq-count-scr';
+    (d.head || d.body).appendChild(s);
+  }
+  // defer loading until the whole page loading is completed
+  window.addEventListener('load', loadCount, false);
+</script>
+<script>
+  var disqus_config = function() {
+    this.page.url = "http://davidlu1001.github.io/2020/04/13/Continuous-Delivery-Performance-Testing/";
+    this.page.identifier = "2020/04/13/Continuous-Delivery-Performance-Testing/";
+    this.page.title = "Continuous Delivery Performance Testing";
+    };
+  NexT.utils.loadComments(document.querySelector('#disqus_thread'), () => {
+    if (window.DISQUS) {
+      DISQUS.reset({
+        reload: true,
+        config: disqus_config
+      });
+    } else {
+      var d = document, s = d.createElement('script');
+      s.src = 'https://davidlu1001.disqus.com/embed.js';
+      s.setAttribute('data-timestamp', '' + +new Date());
+      (d.head || d.body).appendChild(s);
+    }
+  });
+</script>
+
+</body>
+</html>
