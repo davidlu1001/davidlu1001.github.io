@@ -32,6 +32,8 @@ Testing was performed for the internal web application. The test stage that was 
 - Build development image - this includes installing OS packages, building Python wheels and installing Python wheels
 - Run unit and integration tests
          
+<!-- more -->
+
 # Docker Storage Engine Comparison
 
 The Docker storage engine comparison was performed on a single EC2 instance with the following configuration:

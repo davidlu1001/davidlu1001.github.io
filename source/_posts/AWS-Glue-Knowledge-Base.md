@@ -32,6 +32,8 @@ Notes and tips for Glue when implementing the ETL process:
 
 Using `us-east-1` region for AWS CloudFront (certificate)
 
+<!-- more -->
+
 ## ElasticSearch Schema
 
 Updated the ES mappings in all environments so that field A searches are now case insensitive and will work with spaces in A names

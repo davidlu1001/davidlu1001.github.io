@@ -22,6 +22,8 @@ Full autoscaling Zookeeper (actually adding new nodes to the Zookeeper ensemble 
 ## Puppet 
 Using the puppet module: [deric/puppet-zookeeper](https://github.com/deric/puppet-zookeeper)
 
+<!-- more -->
+
 ### Updating Hiera / Puppet
 When a new node starts within the ASG Puppet will run but Zookeeper will not be started automatically. Hiera will need to be updated and Puppet run again for Zookeeper to start.
 

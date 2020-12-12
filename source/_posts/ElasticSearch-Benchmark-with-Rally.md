@@ -36,6 +36,7 @@ Several tools are available for performance testing, e.g. [esperf](https://githu
 
 Here we’ll use Elastic official tool [esrally](https://github.com/elastic/rally), which is a macrobenchmarking framework for Elasticsearch.
 
+<!-- more -->
 
 # Usage
  

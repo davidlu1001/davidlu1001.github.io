@@ -67,6 +67,8 @@ Could use `Kibana` Dev Tool to update cluster settings
 }
 ```
 
+<!-- more -->
+
 ## indices.recovery.max_bytes_per_sec
 
 Defaults to `40mb`. Increasing to `320mb` increases throughput

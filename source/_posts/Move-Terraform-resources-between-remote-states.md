@@ -26,6 +26,8 @@ sample to generate desired commands used for next step
 terraform plan | grep '\s-\s' | sed -e 's/\s-\s//g' | awk '{print "terraform state mv -state-out=monitoring/.terraform/terraform.tfstate "$1,$1}'
 ```
 
+<!-- more -->
+
 #### 3. Ran commands bellow to move
 
 ```

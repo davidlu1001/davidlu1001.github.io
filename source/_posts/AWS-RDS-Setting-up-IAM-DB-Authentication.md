@@ -51,6 +51,8 @@ sample policy granting access to a cluster
 }
 ```
 
+<!-- more -->
+
 Resource takes the form `arn:aws:rds-db:region:account-id:dbuser:dbi-resource-id/database-user-name`
 
 database-user-name is the name of the MySQL database account to associate with IAM authentication. In the example policy, the database account is david_lu.

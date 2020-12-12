@@ -48,6 +48,8 @@ Based on `AWS Cost Optimization Best Practice`, the main measures are probably t
 5. **Right Tagging**: Enforce allocation tagging, while improving Tag coverage and accuracy
 6. **Scheduling On / Off times**: Review existing Auto Scaling policies; Stop instances used in Dev and Prod when not in use and start them again when needed
 
+<!-- more -->
+
 Corresponding to the specific situation of the company, mainly want to talk about 3 and 4 mentioned above.
 
 # About Backup

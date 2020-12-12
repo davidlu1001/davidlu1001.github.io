@@ -37,6 +37,8 @@ Elasticsearch (ES) indexes can be migrated with following steps:
   - Create a final incremental snapshot of the EC2.
   - Perform service switchover to the AWS ES.
 
+<!-- more -->
+
 # Checklist
 Here’s a list of what will we do in detail:
 

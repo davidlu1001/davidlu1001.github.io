@@ -23,6 +23,8 @@ PLAN_OPTIONS="-target="A" -target="B" ... -target="N"" make plan
 
 But Terraform [doesn't support --exclude feature](https://github.com/hashicorp/terraform/issues/2253) for the target at the moment (and we don't want to copy & paste over 50 times for the targets), that's why need to find a way to implement `exclude / include` features within Makefile.
 
+<!-- more -->
+
 # How-to
 
 - make plan

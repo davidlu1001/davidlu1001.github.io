@@ -29,6 +29,8 @@ date: 2020-12-12 00:08:50
 
 The purpose of this blog is to investigate the possible solutions to backup and restore ES indices. So that in the event of a failure, the cluster data can be quickly restored and minimized the business impact.
 
+<!-- more -->
+
 ## Backup content
 Generally the backup content would include:
 

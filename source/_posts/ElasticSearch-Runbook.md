@@ -38,6 +38,8 @@ alias del-shards-unassigned='curl -s -XGET http://localhost:9200/_cat/shards | g
 alias cat-snapshot='curl -s -XGET localhost:9200/_snapshot/<S3_BUCKET_FOR_SNAPSHOT_REPOSITORY>/_all?pretty | jq .snapshots[-1]'
 ```
 
+<!-- more -->
+
 ## Cheatsheet
 https://github.com/sematext/cheatsheets/blob/master/elasticsearch-devops-cheatsheet.md
 

@@ -42,6 +42,8 @@ to ensure that your real infrastructure and Terraform state are consistent with 
 terraform apply
 ```
 
+<!-- more -->
+
 ## 7. Do the `checklist` check
 to see if there are any pre-upgrade steps in the checklist
 

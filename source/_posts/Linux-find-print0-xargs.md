@@ -40,6 +40,8 @@ du: invalid option -- '-'
 du: invalid -t argument 'tGc8A93BVw'
 ```
 
+<!-- more -->
+
 ## find
 
 ```

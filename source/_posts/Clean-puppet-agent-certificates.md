@@ -33,6 +33,8 @@ find . -type f | grep "gateway.ap-southeast-2.aws.ci.xxxxxx.com" | xargs rm -rf
 
 Next step is to ssh into the puppet master and do the same
 
+<!-- more -->
+
 ```
 root@puppet-master:/var/lib/puppet/ssl# find . -type f | grep "gateway"
 ./ca/signed/gateway.ap-southeast-2.aws.ci.xxxxxx.com.pem

@@ -35,6 +35,8 @@ Here’s a quick comparison of the two types:
 
 ![](https://raw.githubusercontent.com/davidlu1001/davidlu1001.github.io/hexo/uPic/Gx8Hj0.png)
 
+<!-- more -->
+
 ## EC2 Instance Savings Plans
 The main differences between EC2 Instance Saving Plans and Standard RIs is that Savings Plan discounts are applied automatically to any EC2 instance (within the same Family and Region) regardless of the Operating System or Tenancy.
 

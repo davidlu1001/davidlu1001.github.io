@@ -31,6 +31,8 @@ e.g.
 echo -n "kafka.partition_size:123|g|#topic_name:test,partition_number:1,broker_id:28041,hostname:kafka-12345" | nc -w 1 -cu localhost 8125
 ```
 
+<!-- more -->
+
 To speed up the send period, can reduce the `-w timeout` to `0` for `nc` command, but sometimes found that `nc -w 0` hung, so started to pipe into `socat` as an alternative:
 
 ```
