@@ -115,7 +115,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+        <h1 class="site-subtitle" itemprop="description">SRE | DevOps</h1>
       
   </div>
 
@@ -307,6 +307,8 @@
 <figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">root@<span class="symbol">gateway:</span>/var/<span class="class"><span class="keyword">lib</span>/<span class="title">puppet</span>/<span class="title">ssl</span><span class="comment"># hostname -f</span></span></span><br><span class="line">gateway.ap-southeast-<span class="number">2</span>.aws.ci.xxxxxx.com</span><br><span class="line"></span><br><span class="line">root@<span class="symbol">gateway:</span>/var/<span class="class"><span class="keyword">lib</span>/<span class="title">puppet</span>/<span class="title">ssl</span><span class="comment"># find . -type f | grep &quot;gateway.ap-southeast-2.aws.ci.xxxxxx.com&quot;</span></span></span><br><span class="line">./public_keys/gateway.ap-southeast-<span class="number">2</span>.aws.ci.xxxxxx.com.pem</span><br><span class="line">./private_keys/gateway.ap-southeast-<span class="number">2</span>.aws.ci.xxxxxx.com.pem</span><br><span class="line">./certificate_requests/gateway.ap-southeast-<span class="number">2</span>.aws.ci.xxxxxx.com.pem</span><br><span class="line">./certs/gateway.ap-southeast-<span class="number">2</span>.aws.ci.xxxxxx.com.pem</span><br><span class="line"></span><br><span class="line"><span class="comment"># to delete them</span></span><br><span class="line">find . -<span class="keyword">type</span> f | grep <span class="string">&quot;gateway.ap-southeast-2.aws.ci.xxxxxx.com&quot;</span> | xargs rm -rf</span><br></pre></td></tr></table></figure>
 
 <p>Next step is to ssh into the puppet master and do the same</p>
+<a id="more"></a>
+
 <figure class="highlight crystal"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">root@puppet-<span class="symbol">master:</span>/var/<span class="class"><span class="keyword">lib</span>/<span class="title">puppet</span>/<span class="title">ssl</span><span class="comment"># find . -type f | grep &quot;gateway&quot;</span></span></span><br><span class="line">./ca/signed/gateway.ap-southeast-<span class="number">2</span>.aws.ci.xxxxxx.com.pem</span><br></pre></td></tr></table></figure>
 
 <p>Ideally there should be only one file hanging in there.</p>
@@ -368,7 +370,7 @@
             </div>
 
             <div class="social-item">
-              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.png">
                 <span class="icon">
                   <i class="fa fa-wechat"></i>
                 </span>

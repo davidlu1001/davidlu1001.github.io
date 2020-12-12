@@ -120,7 +120,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+        <h1 class="site-subtitle" itemprop="description">SRE | DevOps</h1>
       
   </div>
 
@@ -315,6 +315,8 @@
 <p>e.g.</p>
 <figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># use nc</span></span><br><span class="line"></span><br><span class="line"><span class="attribute">echo</span> -n <span class="string">&quot;kafka.partition_size:123|g|#topic_name:test,partition_number:1,broker_id:28041,hostname:kafka-12345&quot;</span> | nc -w <span class="number">1</span> -cu localhost <span class="number">8125</span></span><br></pre></td></tr></table></figure>
 
+<a id="more"></a>
+
 <p>To speed up the send period, can reduce the <code>-w timeout</code> to <code>0</code> for <code>nc</code> command, but sometimes found that <code>nc -w 0</code> hung, so started to pipe into <code>socat</code> as an alternative:</p>
 <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># use socat</span></span><br><span class="line"></span><br><span class="line"><span class="built_in">echo</span> <span class="string">&quot;<span class="variable">$&#123;METRICS_NAME&#125;</span>:<span class="variable">$&#123;PARTITION_SIZE&#125;</span>|g|#topic_name:<span class="variable">$&#123;TOPIC_NAME&#125;</span>,partition_number:<span class="variable">$&#123;PARTITION_NUMBER&#125;</span>,broker_id:<span class="variable">$&#123;BROKER_ID&#125;</span>,hostname:<span class="variable">$&#123;HOSTNAME&#125;</span>&quot;</span> | socat -t 0 STDIN UDP:localhost:8125</span><br></pre></td></tr></table></figure>
 
@@ -383,7 +385,7 @@
             </div>
 
             <div class="social-item">
-              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.png">
                 <span class="icon">
                   <i class="fa fa-wechat"></i>
                 </span>

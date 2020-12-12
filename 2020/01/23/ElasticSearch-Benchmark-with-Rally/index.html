@@ -118,7 +118,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+        <h1 class="site-subtitle" itemprop="description">SRE | DevOps</h1>
       
   </div>
 
@@ -325,6 +325,8 @@
 </ul>
 <h1 id="Tool"><a href="#Tool" class="headerlink" title="Tool"></a>Tool</h1><p>Several tools are available for performance testing, e.g. <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhbmllbGZpcmVtYW4vZXNwZXJm" title="https://github.com/danielfireman/esperf">esperf<i class="fa fa-external-link"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2xvZ3ppby9lbGFzdGljc2VhcmNoLXN0cmVzcy10ZXN0" title="https://github.com/logzio/elasticsearch-stress-test">elasticsearch-stress-test<i class="fa fa-external-link"></i></span> or JMeter. </p>
 <p>Here we’ll use Elastic official tool <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2VsYXN0aWMvcmFsbHk=" title="https://github.com/elastic/rally">esrally<i class="fa fa-external-link"></i></span>, which is a macrobenchmarking framework for Elasticsearch.</p>
+<a id="more"></a>
+
 <h1 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h1><p>Perform testing</p>
 <figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Locally - use &quot;geonames&quot; data, test against existing ES, overwrite ES config for benchmarks, and export result as CSV format</span></span><br><span class="line"></span><br><span class="line">$ esrally <span class="attribute">--track</span>=geonames <span class="attribute">--target-hosts</span>=localhost:9204 <span class="attribute">--pipeline</span>=benchmark-only <span class="attribute">--challenge</span>=append-no-conflicts <span class="attribute">--report-format</span>=csv <span class="attribute">--report-file</span>=~/es_benchmarks/result.csv <span class="attribute">--user-tag</span>=<span class="string">&quot;shards:6&quot;</span> <span class="attribute">--track-params</span>=<span class="string">&quot;cluster_health:&#x27;yellow&#x27;,number_of_shards:6,bulk_size:5000&quot;</span></span><br></pre></td></tr></table></figure>
 
@@ -414,7 +416,7 @@
             </div>
 
             <div class="social-item">
-              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.png">
                 <span class="icon">
                   <i class="fa fa-wechat"></i>
                 </span>

@@ -115,7 +115,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+        <h1 class="site-subtitle" itemprop="description">SRE | DevOps</h1>
       
   </div>
 
@@ -306,6 +306,8 @@
 <h3 id="Steps"><a href="#Steps" class="headerlink" title="Steps"></a>Steps</h3><h4 id="1-Move-Terraform-files-to-the-new-folder"><a href="#1-Move-Terraform-files-to-the-new-folder" class="headerlink" title="1. Move Terraform files to the new folder"></a>1. Move Terraform files to the new folder</h4><h4 id="2-Run-make-plan-to-get-a-list-of-resources-that-would-be-deleted"><a href="#2-Run-make-plan-to-get-a-list-of-resources-that-would-be-deleted" class="headerlink" title="2. Run make plan to get a list of resources that would be deleted"></a>2. Run make plan to get a list of resources that <em>would</em> be deleted</h4><p>sample to generate desired commands used for next step</p>
 <figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">terraform</span> plan | grep <span class="string">&#x27;\s-\s&#x27;</span> | sed -e <span class="string">&#x27;s/\s-\s//g&#x27;</span> | awk <span class="string">&#x27;&#123;print &quot;terraform state mv -state-out=monitoring/.terraform/terraform.tfstate &quot;<span class="variable">$1</span>,<span class="variable">$1</span>&#125;&#x27;</span></span><br></pre></td></tr></table></figure>
 
+<a id="more"></a>
+
 <h4 id="3-Ran-commands-bellow-to-move"><a href="#3-Ran-commands-bellow-to-move" class="headerlink" title="3. Ran commands bellow to move"></a>3. Ran commands bellow to move</h4><figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd infrastructure</span><br><span class="line"> </span><br><span class="line">terraform <span class="keyword">state</span> mv -state-out=monitoring/.terraform/terraform.tfstate datadog_monitor.monitor-<span class="number">01</span>-composite datadog_monitor.monitor-<span class="number">01</span>-composite</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
 
 <h4 id="4-Push-remote-state-in-new-folder"><a href="#4-Push-remote-state-in-new-folder" class="headerlink" title="4. Push remote state in new folder"></a>4. Push remote state in new folder</h4><figure class="highlight pf"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd monitoring</span><br><span class="line"></span><br><span class="line">terraform <span class="keyword">state</span> push .terraform/terraform.tfstate</span><br></pre></td></tr></table></figure>
@@ -422,7 +424,7 @@
             </div>
 
             <div class="social-item">
-              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.png">
                 <span class="icon">
                   <i class="fa fa-wechat"></i>
                 </span>

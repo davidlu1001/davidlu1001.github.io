@@ -117,7 +117,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+        <h1 class="site-subtitle" itemprop="description">SRE | DevOps</h1>
       
   </div>
 
@@ -319,6 +319,8 @@
 <li>ES / Name: can NOT contain “-“</li>
 </ul>
 <h2 id="ACM-SSL-Cert"><a href="#ACM-SSL-Cert" class="headerlink" title="ACM SSL Cert"></a>ACM SSL Cert</h2><p>Using <code>us-east-1</code> region for AWS CloudFront (certificate)</p>
+<a id="more"></a>
+
 <h2 id="ElasticSearch-Schema"><a href="#ElasticSearch-Schema" class="headerlink" title="ElasticSearch Schema"></a>ElasticSearch Schema</h2><p>Updated the ES mappings in all environments so that field A searches are now case insensitive and will work with spaces in A names</p>
 <p>e.g. Fixed the issue for field A so searches are now case insensitive and will work with spaces in A names</p>
 <figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">query</span>=<span class="string">&#x27;&#123;&quot;query&quot;:&#123;&quot;terms&quot;:&#123;&quot;name&quot;:[&quot;gift vouchers&quot;]&#125;&#125;&#125;&#x27;</span></span><br><span class="line">python sign_request.py -X <span class="builtin-name">GET</span> <span class="variable">$es</span>/A/_search -d <span class="string">&quot;<span class="variable">$query</span>&quot;</span></span><br><span class="line">| jq -r <span class="string">&#x27;.hits.hits&#x27;</span></span><br><span class="line">[</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="string">&quot;_index&quot;</span>: <span class="string">&quot;A&quot;</span>,</span><br><span class="line">    <span class="string">&quot;_type&quot;</span>: <span class="string">&quot;A&quot;</span>,</span><br><span class="line">    <span class="string">&quot;_id&quot;</span>: <span class="string">&quot;AWSXXXXXXXXXXXXXXXX&quot;</span>,</span><br><span class="line">    <span class="string">&quot;_score&quot;</span>: Y.Z,</span><br><span class="line">    <span class="string">&quot;_source&quot;</span>: &#123;</span><br><span class="line">      <span class="string">&quot;name&quot;</span>: <span class="string">&quot;Gift Vouchers&quot;</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">]</span><br></pre></td></tr></table></figure>
@@ -415,7 +417,7 @@
             </div>
 
             <div class="social-item">
-              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.png">
                 <span class="icon">
                   <i class="fa fa-wechat"></i>
                 </span>

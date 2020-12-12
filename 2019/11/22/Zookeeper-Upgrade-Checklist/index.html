@@ -115,7 +115,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+        <h1 class="site-subtitle" itemprop="description">SRE | DevOps</h1>
       
   </div>
 
@@ -307,6 +307,8 @@
 </ul>
 <h2 id="Autoscaling"><a href="#Autoscaling" class="headerlink" title="Autoscaling"></a>Autoscaling</h2><p>Full autoscaling Zookeeper (actually adding new nodes to the Zookeeper ensemble automatically) is a bit tricky currently as a full rolling restart of the Zookeeper cluster would have to be orchestrated without ever losing quorum. Zookeeper 3.5 introduced <span class="exturl" data-url="aHR0cHM6Ly96b29rZWVwZXIuYXBhY2hlLm9yZy9kb2MvcjMuNS41L3pvb2tlZXBlclJlY29uZmlnLmh0bWw=" title="https://zookeeper.apache.org/doc/r3.5.5/zookeeperReconfig.html">dynamic reconfiguration<i class="fa fa-external-link"></i></span> which would most likely make this significantly easier. There are some other options for <span class="exturl" data-url="aHR0cHM6Ly93d3cuY3JlZGVyYS5jb20vYmxvZy90ZWNobm9sb2d5LXNvbHV0aW9ucy9ob3ctdG8tYXV0b21hdGUtem9va2VlcGVyLWluLWF3cy8=" title="https://www.credera.com/blog/technology-solutions/how-to-automate-zookeeper-in-aws/">autoscaling Zookeeper 3.4<i class="fa fa-external-link"></i></span> but we’d need to weigh up whether that additional complexity is really worth it.</p>
 <h2 id="Puppet"><a href="#Puppet" class="headerlink" title="Puppet"></a>Puppet</h2><p>Using the puppet module: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RlcmljL3B1cHBldC16b29rZWVwZXI=" title="https://github.com/deric/puppet-zookeeper">deric/puppet-zookeeper<i class="fa fa-external-link"></i></span></p>
+<a id="more"></a>
+
 <h3 id="Updating-Hiera-Puppet"><a href="#Updating-Hiera-Puppet" class="headerlink" title="Updating Hiera / Puppet"></a>Updating Hiera / Puppet</h3><p>When a new node starts within the ASG Puppet will run but Zookeeper will not be started automatically. Hiera will need to be updated and Puppet run again for Zookeeper to start.</p>
 <p>“zookeeper::servers” - Needs to be set to a hash of the complete list of servers in the Zookeeper ensemble. This is typically set at the “dc” level in the hierarchy, e.g.</p>
 <figure class="highlight apache"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="attribute">puppet</span>/hieradata-masterless/dc</span><br><span class="line"></span><br><span class="line"><span class="attribute">cat</span> test-us-west-<span class="number">2</span>.yaml</span><br><span class="line"><span class="attribute">zookeeper</span>::servers:</span><br><span class="line">  <span class="attribute">100</span>: zookeeper-<span class="number">0</span>cdf<span class="number">08</span>e<span class="number">0</span>d<span class="number">09</span>dd<span class="number">3530</span>.oregon.test.xyz.org</span><br><span class="line">  <span class="attribute">101</span>: zookeeper-<span class="number">01</span>ff<span class="number">482</span>cf<span class="number">77636240</span>.oregon.test.xyz.org</span><br><span class="line">  <span class="attribute">102</span>: zookeeper-<span class="number">0749</span>d<span class="number">84</span>c<span class="number">7</span>dfd<span class="number">4</span>d<span class="number">798</span>.oregon.test.xyz.org</span><br></pre></td></tr></table></figure>
@@ -392,7 +394,7 @@
             </div>
 
             <div class="social-item">
-              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.png">
                 <span class="icon">
                   <i class="fa fa-wechat"></i>
                 </span>

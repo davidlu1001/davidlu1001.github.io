@@ -117,7 +117,7 @@
         <span class="logo-line-after"><i></i></span>
       </a>
     </div>
-        <h1 class="site-subtitle" itemprop="description">DevOps / SRE</h1>
+        <h1 class="site-subtitle" itemprop="description">SRE | DevOps</h1>
       
   </div>
 
@@ -314,6 +314,8 @@
 <p>sample policy granting access to a cluster</p>
 <figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">   <span class="attr">&quot;Version&quot;</span>: <span class="string">&quot;2012-10-17&quot;</span>,</span><br><span class="line">   <span class="attr">&quot;Statement&quot;</span>: [</span><br><span class="line">      &#123;</span><br><span class="line">         <span class="attr">&quot;Effect&quot;</span>: <span class="string">&quot;Allow&quot;</span>,</span><br><span class="line">         <span class="attr">&quot;Action&quot;</span>: [</span><br><span class="line">             <span class="string">&quot;rds-db:connect&quot;</span></span><br><span class="line">         ],</span><br><span class="line">         <span class="attr">&quot;Resource&quot;</span>: [</span><br><span class="line">             <span class="string">&quot;arn:aws:rds-db:us-west-2:123456789012:dbuser:cluster-CO4FHMOYDKJ7CVBEJS2UWDQX7I/david_lu&quot;</span></span><br><span class="line">         ]</span><br><span class="line">      &#125;</span><br><span class="line">   ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
+<a id="more"></a>
+
 <p>Resource takes the form <code>arn:aws:rds-db:region:account-id:dbuser:dbi-resource-id/database-user-name</code></p>
 <p>database-user-name is the name of the MySQL database account to associate with IAM authentication. In the example policy, the database account is david_lu.</p>
 <p>With IAM database authentication, we don’t need to assign database passwords to the MySQL user accounts we create. Instead, authentication is handled by AWSAuthenticationPlugin—an AWS-provided plugin that works seamlessly with IAM to authenticate our IAM users.</p>
@@ -385,7 +387,7 @@
             </div>
 
             <div class="social-item">
-              <a target="_blank" class="social-link" href="/images/wechat_channel.jpg">
+              <a target="_blank" class="social-link" href="/images/wechat_channel.png">
                 <span class="icon">
                   <i class="fa fa-wechat"></i>
                 </span>

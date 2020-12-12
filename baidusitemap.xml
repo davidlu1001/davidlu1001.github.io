@@ -3,53 +3,69 @@
   <url>
     <loc>http://davidlu1001.github.io/2020/12/12/ElasticSearch-backup-with-AWS-S3/</loc>
     <lastmod>2020-12-11</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2020/06/22/Terraform-Upgrade-to-0-12/</loc>
     <lastmod>2020-06-22</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2020/04/28/AWS-Savings-Plans/</loc>
     <lastmod>2020-04-28</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2020/04/22/Send-metric-to-StatsD-Datadog/</loc>
     <lastmod>2020-04-22</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2020/04/20/Cost-Optimization-cases-on-AWS/</loc>
     <lastmod>2020-04-20</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2020/04/16/ElasticSearch-Runbook/</loc>
     <lastmod>2020-04-15</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2020/04/13/Continuous-Delivery-Performance-Testing/</loc>
     <lastmod>2020-04-13</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2020/04/08/Elasticsearch-important-settings/</loc>
     <lastmod>2020-04-08</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2020/03/13/AWS-RDS-Setting-up-IAM-DB-Authentication/</loc>
     <lastmod>2020-03-13</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2020/01/23/ElasticSearch-Benchmark-with-Rally/</loc>
     <lastmod>2020-01-23</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2019/11/22/Zookeeper-Upgrade-Checklist/</loc>
     <lastmod>2019-11-22</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2019/11/12/ElasticSearch-Migration-to-AWS/</loc>
     <lastmod>2019-11-12</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2019/08/13/How-to-use-Terraform-include-exclude/</loc>
     <lastmod>2019-08-13</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2019/04/28/Move-Terraform-resources-between-remote-states/</loc>
     <lastmod>2019-04-28</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2018/08/20/AWS-Glue-Knowledge-Base/</loc>
     <lastmod>2018-08-20</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2018/03/08/Clean-puppet-agent-certificates/</loc>
     <lastmod>2018-03-08</lastmod>
-  </url>  <url>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2016/02/20/Linux-find-print0-xargs/</loc>
     <lastmod>2016-02-20</lastmod>
   </url>
-</urlset>
+</urlset> 
