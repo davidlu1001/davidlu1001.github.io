@@ -55,7 +55,7 @@ P.S.
 
 - Transient settings are not considered for backup
 
-- Also can capture these cluster settings in a data backup snapshot by specifying the include_global_state: true (default) parameter for the snapshot API.
+- Also can capture these cluster settings in a data backup snapshot by specifying the `include_global_state: true` (default) parameter for the snapshot API.
 
 ## Snapshot Repository
 In order to enable backup for ES cluster data, a snapshot repository must be registered before performing snapshot and restore operations.
@@ -86,7 +86,7 @@ Based on backup granularity and retention time, we can choose the following stra
 
 - Takes hourly snapshots and retains up to 336 of them for 14 days.
 
-Can carefully start with daily backup (the initial backup may take relatively longer time) and keep monitoring, and then could try 2 or 4 times per day, and ultimately with hourly backup if it’s feasible, in order to provide more granular recovery points.
+Can carefully start with daily backup (the initial backup may take relatively longer time) and keep monitoring, and then could try hourly backup if it’s feasible, in order to provide more granular recovery points.
 
 > Incremental snapshot mechanism
 >
@@ -164,6 +164,8 @@ repository-s3
 
 - Need to update the role permission for both ES master / data node
 
+> Note:
+>
 > Otherwise will get the repository_verification_exception error when trying to register the snapshot repository
 
 ```
@@ -195,7 +197,7 @@ curl -X PUT "localhost:9200/_snapshot/snapshot-s3-repo?pretty" -H 'Content-Type:
 '
 ```
 
-- Register snapshot repository for each index (with base_path: same S3 bucket, different directory)
+- Register snapshot repository for each index (with base_path: same S3 bucket, but different directory)
 
 ```
 # e.g. for .elastichq
@@ -220,9 +222,9 @@ curl localhost:9200/_snapshot?pretty
 ```
 
 # Backup operation
-The snapshots lifecycle management (SLM) feature is introduced and natively supported in ES version 7.5.0, so for lower version need to self-manage the snapshots / retention policy.
+The snapshots lifecycle management (SLM) feature is introduced and natively supported in ES version `7.5.0`, so for lower version need to self-manage the snapshots / retention policy.
 
-At this stage, can use existing tool curator (with cronjob) on EC2 instance (e.g. gateway / master node), to make the entire process run first. And then if it runs normally, can consider using ECS cronjob (scheduled task) to schedule the backup in the next phrase to avoid single point of failure.
+Can either use existing tool curator (with cronjob) on EC2 instance (e.g. gateway / master node), or can consider using ECS cronjob (scheduled task) to schedule the backup to avoid single point of failure.
 
 For curator version compatibility, should be safe to choose the latest version `5.8.3` to support ES `6.X`.
 
@@ -248,8 +250,8 @@ curl localhost:9200/_snapshot/snapshot-s3-repo/_all?pretty
 curl -X DELETE "localhost:9200/_snapshot/snapshot-s3-repo/elastichq-20201125?pretty"
 ```
 
-Useful Config for Snapshot / Restore Process
-
+> Useful Config for Snapshot / Restore Process
+>
 > 
 > `max_restore_bytes_per_sec`
 > 
@@ -277,9 +279,7 @@ Useful Config for Snapshot / Restore Process
 
 > Reference
 > 
-> Just to mention here as a reference: By default, the cluster state is not restored. To include the global cluster state, need to set include_global_state to true in the restore request body (if include the cluster state in the previous backup operation). 
-> 
-> Usually we don’t want to backup the cluster state. And the cluster settings (not including index / shard settings) are stored in our configuration management settings
+> By default, the cluster state is not restored. To include the global cluster state, need to set `include_global_state` to `true` in the restore request body (if include the cluster state in the previous backup operation), but usually we don’t want to backup the cluster state.
 >
 > An existing index can be only restored if it’s closed and has the same number of shards as the index in the snapshot. 
 >
@@ -331,7 +331,7 @@ P.S.
 
 Examples:
 
-`"${DRY_RUN}"` can be `--dry-run` or `""` (empty)
+Here the variable `"${DRY_RUN}"` can be either `"--dry-run"` (for dry-run mode) or `""` (empty, means without dry-run)
 
 - create snapshot
 
@@ -351,8 +351,6 @@ Examples:
 
 - remove snapshot
 ```
-# remove old snapshots for index(es) in the same repo
-
 /usr/local/bin/curator_cli \
 	${DRY_RUN} \
 	--host "${ELASTICSEARCH_HOST}" \
@@ -392,7 +390,7 @@ Examples:
 
 Examples:
 
-`"${DRY_RUN}"` can be `--dry-run` or `""` (empty)
+Here the variable `"${DRY_RUN}"` can be either `"--dry-run"` (for dry-run mode) or `""` (empty, means without dry-run)
 
 ```
 /usr/local/bin/curator --config /etc/curator/config.yml "${DRY_RUN}" /etc/curator/actions.yml
@@ -491,6 +489,72 @@ actions:
       - filtertype: state
         state: SUCCESS
         exclude:
+```
+
+## docker-curator
+
+The Docker image for ES Curator (to manage ES `snapshots`) could be found here - [davidlu1001/docker-curator](https://github.com/davidlu1001/docker-curator)
+
+This image keeps up to date with curator releases `5.8.3`. It is also based on minimal alpine image.
+
+### Features
+- Upgrade curator to version `5.8.3`
+- Add support for snapshot / restore (use `curator_cli` for single index scenario)
+- Add support for snapshot / restore `ALL` indexes for ES using `curator` with actions rules. This would be useful when:
+    - too many indexes (can not match with `prefix / regex` pattern) for `curator_cli`
+    - if use different snapshot repository per index
+    - for accident recovery scenario to restore ALL indexes
+- Add `DRY_RUN` mode
+- Rewrite Dockerfile and use `alpine` to reduce image size (with `python3`)
+
+### Usage
+Image `entrypoint` is set to customized script, need to pass paremeters to `CMD`, can also support override `ENV`
+
+Default ENV value:
+```
+TYPE=snapshot
+INDEX_PREFIX=.kibana
+REPO_NAME=snapshot-repo
+DRY_RUN=True
+```
+
+e.g.
+```
+# Snapshot single index with DRY_RUN mode, and delete snapshots 14 days ago
+
+docker-compose run --rm es-curator snapshot .monitoring-es-7-2020.12.04 snapshot-repo True
+
+
+# Restore single index (with latest snapshot) without DRY_RUN mode
+
+docker-compose run --rm es-curator restore .monitoring-es-7-2020.12.04 snapshot-repo False
+
+
+# Snapshot ALL indexes for ES without DRY_RUN mode, and delete snapshots 14 days ago
+
+docker-compose run --rm es-curator snapshot ALL snapshot-repo False
+
+
+# Restore ALL indexes for ES (with latest snapshot) without DRY_RUN mode
+
+docker-compose run --rm es-curator restore ALL snapshot-repo False
+```
+
+Pass `ENV`:
+
+```
+- ELASTICSEARCH_HOST: default is `elasticsearch`
+
+- UNIT: default is days, support `seconds | minutes | hours | days | weeks | months | years`
+
+- UNIT_COUNT: default is 14
+```
+
+e.g.
+```
+# Snapshot single index without DRY_RUN mode, and delete snapshots older than 1 minutes ago
+
+UNIT=minutes UNIT_COUNT=1 docker-compose run --rm es-curator snapshot .monitoring-es-7-2020.12.04 snapshot-repo False
 ```
 
 # References
