@@ -145,11 +145,11 @@
     
       <category term="AWS" scheme="http://davidlu1001.github.io/tags/AWS/"/>
     
-      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
-    
       <category term="Savings Plan" scheme="http://davidlu1001.github.io/tags/Savings-Plan/"/>
     
       <category term="Reserved Instances" scheme="http://davidlu1001.github.io/tags/Reserved-Instances/"/>
+    
+      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
     
       <category term="Cost Optimization" scheme="http://davidlu1001.github.io/tags/Cost-Optimization/"/>
     
@@ -399,11 +399,11 @@
     
       <category term="AWS" scheme="http://davidlu1001.github.io/tags/AWS/"/>
     
+      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
+    
       <category term="DB" scheme="http://davidlu1001.github.io/tags/DB/"/>
     
       <category term="RDS" scheme="http://davidlu1001.github.io/tags/RDS/"/>
-    
-      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
     
   </entry>
   
