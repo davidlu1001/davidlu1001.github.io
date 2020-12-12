@@ -8,9 +8,7 @@ subtitle: "SRE | DevOps"
 description: "Technology enthusiast"
 keywords: "SRE, DevOps, Cloud, AWS, Python, Big Data"
 author: David Lu
-language:
-  - en
-  - zh-CN
+language: en
 timezone: ""
 
 # URL
