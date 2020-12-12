@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en,zh-CN,default">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -16,11 +16,12 @@
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"davidlu1001.github.io","root":"/","scheme":"Pisces","version":"7.7.2","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"davidlu1001.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="TL;DR ElasticSearch Backup (snapshot &#x2F; restore) on AWS S3  Steps &#x2F; Configrations for ES snapshot &#x2F; restore  Use elastic curator to manage snapshots (create &#x2F; remove)  Docker image for ES Curator to ma">
@@ -49,7 +50,8 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : true
+    isPost : true,
+    lang   : 'en'
   };
 </script>
 
@@ -112,15 +114,12 @@
 
   <div class="site-meta">
 
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Davidlu's Blog</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-        <h1 class="site-subtitle" itemprop="description">SRE | DevOps</h1>
-      
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Davidlu's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">SRE | DevOps</p>
   </div>
 
   <div class="site-nav-right">
@@ -131,37 +130,38 @@
 </div>
 
 
+
+
 <nav class="site-nav">
-  
-  <ul id="menu" class="menu">
+  <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
 
   </li>
         <li class="menu-item menu-item-about">
 
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
 
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">26</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">15</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">17</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
 
   </li>
         <li class="menu-item menu-item-sitemap">
 
-    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>Sitemap</a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -169,17 +169,18 @@
         </a>
       </li>
   </ul>
-
 </nav>
-  <div class="site-search">
-    <div class="search-pop-overlay">
-  <div class="popup search-popup">
-      <div class="search-header">
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
   <span class="search-icon">
     <i class="fa fa-search"></i>
   </span>
   <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+    <input autocomplete="off" autocapitalize="off"
            placeholder="Searching..." spellcheck="false"
            type="search" class="search-input">
   </div>
@@ -193,10 +194,9 @@
   </div>
 </div>
 
+    </div>
   </div>
-</div>
 
-  </div>
 </div>
     </header>
 
@@ -212,14 +212,13 @@
         <div class="content-wrap">
           
 
-          <div class="content">
+          <div class="content post posts-expand">
             
 
-  <div class="posts-expand">
-      
+    
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://davidlu1001.github.io/2020/12/12/ElasticSearch-backup-with-AWS-S3/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -232,14 +231,14 @@
       <meta itemprop="name" content="Davidlu's Blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
+        <h1 class="post-title" itemprop="name headline">
           ElasticSearch backup with AWS S3
-        </h2>
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
@@ -247,7 +246,7 @@
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
+                <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
@@ -275,7 +274,7 @@
   <span class="post-meta-item">
     
       <span class="post-meta-item-icon">
-        <i class="fa fa-comment-o"></i>
+        <i class="far fa-comment"></i>
       </span>
       <span class="post-meta-item-text">Disqus: </span>
     
@@ -287,14 +286,14 @@
   <br>
             <span class="post-meta-item" title="Symbols count in article">
               <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
+                <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
               <span>16k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
+                <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
               <span>15 mins.</span>
@@ -316,7 +315,7 @@
 </li>
 <li><p>Use elastic <code>curator</code> to manage snapshots (create / remove)</p>
 </li>
-<li><p>Docker image for ES Curator to manage Elasticsearch snapshots - <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAxL2RvY2tlci1jdXJhdG9y" title="https://github.com/davidlu1001/docker-curator">davidlu1001/docker-curator<i class="fa fa-external-link"></i></span></p>
+<li><p>Docker image for ES Curator to manage Elasticsearch snapshots - <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAxL2RvY2tlci1jdXJhdG9y">davidlu1001/docker-curator<i class="fa fa-external-link-alt"></i></span></p>
 </li>
 </ul>
 <h1 id="Overview"><a href="#Overview" class="headerlink" title="Overview"></a>Overview</h1><p>The purpose of this blog is to investigate the possible solutions to backup and restore ES indices. So that in the event of a failure, the cluster data can be quickly restored and minimized the business impact.</p>
@@ -343,7 +342,7 @@
 <ul>
 <li><p>Local shared filesystem: NFS</p>
 </li>
-<li><p>Remote repositories: backed by the cloud (AWS / Azure / GCP) or by distributed file systems (HDFS) with <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3BsdWdpbnMvNy4xMC9yZXBvc2l0b3J5Lmh0bWw=" title="https://www.elastic.co/guide/en/elasticsearch/plugins/7.10/repository.html">repository plugins<i class="fa fa-external-link"></i></span></p>
+<li><p>Remote repositories: backed by the cloud (AWS / Azure / GCP) or by distributed file systems (HDFS) with <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3BsdWdpbnMvNy4xMC9yZXBvc2l0b3J5Lmh0bWw=">repository plugins<i class="fa fa-external-link-alt"></i></span></p>
 </li>
 </ul>
 <p>Considering that if use shared filesystem NFS, additional setup / configuration is required, and the cluster needs rolling restart to take effect. As all nodes must have access to the shared storage to be able to store the snapshot data. Therefore, from the perspective of complexity and operational safety, will not consider it (even the cluster only uses a little of the disk space).</p>
@@ -363,7 +362,7 @@
 <p>Incremental snapshot mechanism</p>
 <p>The snapshot functionality will simply remove the data that was only referenced by the deleted snapshot but will leave the data that is still required for other snapshots in the repository.</p>
 <p>So it would be safe to delete the first initial snapshot without affecting the latter snapshots.</p>
-<p>Ref: <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ibG9nL2ZvdW5kLWVsYXN0aWNzZWFyY2gtc25hcHNob3QtYW5kLXJlc3RvcmU=" title="https://www.elastic.co/blog/found-elasticsearch-snapshot-and-restore">https://www.elastic.co/blog/found-elasticsearch-snapshot-and-restore<i class="fa fa-external-link"></i></span></p>
+<p>Ref: <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ibG9nL2ZvdW5kLWVsYXN0aWNzZWFyY2gtc25hcHNob3QtYW5kLXJlc3RvcmU=">https://www.elastic.co/blog/found-elasticsearch-snapshot-and-restore<i class="fa fa-external-link-alt"></i></span></p>
 </blockquote>
 <h1 id="Backup-cluster’s-data"><a href="#Backup-cluster’s-data" class="headerlink" title="Backup cluster’s data"></a>Backup cluster’s data</h1><p>Will take snapshot per index, instead of backup the whole cluster, which can potentially bring the flexibility for the restore step.</p>
 <p>The snapshots are taken incrementally. This enables us to take frequent snapshots with minimal overhead (the initial backup may take relatively longer time, based on the amount of data). The more frequently we take snapshots, the less time it will take to complete the backup.</p>
@@ -416,13 +415,13 @@
 <blockquote>
 <p>Useful Config for Snapshot / Restore Process</p>
 <p><code>max_restore_bytes_per_sec</code></p>
-<p>Throttles per node restore rate. Defaults to unlimited. Note that restores are also throttled through <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS83LjEwL3JlY292ZXJ5Lmh0bWw=" title="https://www.elastic.co/guide/en/elasticsearch/reference/7.10/recovery.html">recovery settings<i class="fa fa-external-link"></i></span>.</p>
+<p>Throttles per node restore rate. Defaults to unlimited. Note that restores are also throttled through <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS83LjEwL3JlY292ZXJ5Lmh0bWw=">recovery settings<i class="fa fa-external-link-alt"></i></span>.</p>
 <p><code>max_snapshot_bytes_per_sec</code></p>
 <p>Throttles per node snapshot rate. Defaults to <code>40mb</code> per second.</p>
 <p><code>chunk_size</code></p>
 <p>Big files can be broken down into chunks during snapshotting if needed. Specify the chunk size as a value and unit, for example: 1GB, 10MB, 5KB, 500B. Defaults to <code>1GB</code>.</p>
 <p><code>buffer_size</code></p>
-<p>Minimum threshold below which the chunk is uploaded using a single request. Beyond this threshold, the S3 repository will use the <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL0FtYXpvblMzL2xhdGVzdC9kZXYvdXBsb2Fkb2JqdXNpbmdtcHUuaHRtbA==" title="https://docs.aws.amazon.com/AmazonS3/latest/dev/uploadobjusingmpu.html">AWS Multipart Upload API<i class="fa fa-external-link"></i></span> to split the chunk into several parts, each of buffer_size length, and to upload each part in its own request. Should between 5mb to 5gb. Defaults to the minimum between 100mb and 5% of the heap size.</p>
+<p>Minimum threshold below which the chunk is uploaded using a single request. Beyond this threshold, the S3 repository will use the <span class="exturl" data-url="aHR0cHM6Ly9kb2NzLmF3cy5hbWF6b24uY29tL0FtYXpvblMzL2xhdGVzdC9kZXYvdXBsb2Fkb2JqdXNpbmdtcHUuaHRtbA==">AWS Multipart Upload API<i class="fa fa-external-link-alt"></i></span> to split the chunk into several parts, each of buffer_size length, and to upload each part in its own request. Should between 5mb to 5gb. Defaults to the minimum between 100mb and 5% of the heap size.</p>
 </blockquote>
 <h2 id="Restore-cluster’s-data"><a href="#Restore-cluster’s-data" class="headerlink" title="Restore cluster’s data"></a>Restore cluster’s data</h2><h3 id="Restore-Prerequisites"><a href="#Restore-Prerequisites" class="headerlink" title="Restore Prerequisites"></a>Restore Prerequisites</h3><ul>
 <li><p>Confirm the target index has same number of shards as the index in the snapshot</p>
@@ -480,7 +479,7 @@
 <p><code>actions.yml</code> for <code>restore</code>:</p>
 <figure class="highlight yaml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">actions:</span></span><br><span class="line">  <span class="attr">1:</span></span><br><span class="line">    <span class="attr">action:</span> <span class="string">close</span></span><br><span class="line">    <span class="attr">description:</span> <span class="string">&quot;Close selected indices company-index-A before restoring snapshot&quot;</span></span><br><span class="line">    <span class="attr">options:</span></span><br><span class="line">      <span class="attr">continue_if_exception:</span> <span class="literal">True</span></span><br><span class="line">      <span class="attr">ignore_empty_list:</span> <span class="literal">True</span></span><br><span class="line">    <span class="attr">filters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">filtertype:</span> <span class="string">pattern</span></span><br><span class="line">        <span class="attr">kind:</span> <span class="string">prefix</span></span><br><span class="line">        <span class="attr">value:</span> <span class="string">company-index-A</span></span><br><span class="line">  <span class="attr">2:</span></span><br><span class="line">    <span class="attr">action:</span> <span class="string">restore</span></span><br><span class="line">    <span class="attr">description:</span> <span class="string">&gt;-</span></span><br><span class="line">      <span class="string">Restore</span> <span class="string">all</span> <span class="string">indices</span> <span class="string">in</span> <span class="string">the</span> <span class="string">most</span> <span class="string">recent</span> <span class="string">company-index-A-*</span> <span class="string">snapshot</span> <span class="string">with</span> <span class="string">state</span></span><br><span class="line">      <span class="string">SUCCESS.</span>  <span class="string">Wait</span> <span class="string">for</span> <span class="string">the</span> <span class="string">restore</span> <span class="string">to</span> <span class="string">complete</span> <span class="string">before</span> <span class="string">continuing.</span>  <span class="string">Skip</span></span><br><span class="line">      <span class="string">the</span> <span class="string">repository</span> <span class="string">filesystem</span> <span class="string">access</span> <span class="string">check.</span>  <span class="string">Use</span> <span class="string">the</span> <span class="string">other</span> <span class="string">options</span> <span class="string">to</span> <span class="string">define</span></span><br><span class="line">      <span class="string">the</span> <span class="string">index/shard</span> <span class="string">settings</span> <span class="string">for</span> <span class="string">the</span> <span class="string">restore.</span></span><br><span class="line">    <span class="attr">options:</span></span><br><span class="line">      <span class="attr">repository:</span> <span class="string">snapshot-s3-index-A</span></span><br><span class="line">      <span class="comment"># Leaving name blank will result in restoring the most recent snapshot by age</span></span><br><span class="line">      <span class="attr">name:</span></span><br><span class="line">      <span class="comment"># Leaving indices blank will result in restoring all indices in the snapshot</span></span><br><span class="line">      <span class="attr">indices:</span></span><br><span class="line">      <span class="attr">include_aliases:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">ignore_unavailable:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">include_global_state:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">partial:</span> <span class="literal">False</span></span><br><span class="line">      <span class="attr">extra_settings:</span></span><br><span class="line">        <span class="attr">index_settings:</span></span><br><span class="line">          <span class="attr">number_of_replicas:</span> <span class="number">2</span></span><br><span class="line">      <span class="attr">wait_for_completion:</span> <span class="literal">True</span></span><br><span class="line">      <span class="attr">skip_repo_fs_check:</span> <span class="literal">True</span></span><br><span class="line">      <span class="attr">disable_action:</span> <span class="literal">False</span></span><br><span class="line">    <span class="attr">filters:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">filtertype:</span> <span class="string">pattern</span></span><br><span class="line">        <span class="attr">kind:</span> <span class="string">prefix</span></span><br><span class="line">        <span class="attr">value:</span> <span class="string">company-index-A</span></span><br><span class="line">        <span class="attr">exclude:</span></span><br><span class="line">      <span class="bullet">-</span> <span class="attr">filtertype:</span> <span class="string">state</span></span><br><span class="line">        <span class="attr">state:</span> <span class="string">SUCCESS</span></span><br><span class="line">        <span class="attr">exclude:</span></span><br></pre></td></tr></table></figure>
 
-<h2 id="docker-curator"><a href="#docker-curator" class="headerlink" title="docker-curator"></a>docker-curator</h2><p>The Docker image for ES Curator (to manage ES <code>snapshots</code>) could be found here - <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAxL2RvY2tlci1jdXJhdG9y" title="https://github.com/davidlu1001/docker-curator">davidlu1001/docker-curator<i class="fa fa-external-link"></i></span></p>
+<h2 id="docker-curator"><a href="#docker-curator" class="headerlink" title="docker-curator"></a>docker-curator</h2><p>The Docker image for ES Curator (to manage ES <code>snapshots</code>) could be found here - <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAxL2RvY2tlci1jdXJhdG9y">davidlu1001/docker-curator<i class="fa fa-external-link-alt"></i></span></p>
 <p>This image keeps up to date with curator releases <code>5.8.3</code>. It is also based on minimal alpine image.</p>
 <h3 id="Features"><a href="#Features" class="headerlink" title="Features"></a>Features</h3><ul>
 <li>Upgrade curator to version <code>5.8.3</code></li>
@@ -508,15 +507,15 @@
 <figure class="highlight routeros"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Snapshot single index without DRY_RUN mode, and delete snapshots older than 1 minutes ago</span></span><br><span class="line"></span><br><span class="line"><span class="attribute">UNIT</span>=minutes <span class="attribute">UNIT_COUNT</span>=1 docker-compose <span class="builtin-name">run</span> --rm es-curator snapshot .monitoring-es-7-2020.12.04 snapshot-repo <span class="literal">False</span></span><br></pre></td></tr></table></figure>
 
 <h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><ul>
-<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L2JhY2t1cC1jbHVzdGVyLmh0bWw=" title="https://www.elastic.co/guide/en/elasticsearch/reference/current/backup-cluster.html">Elastic - Backup Cluster<i class="fa fa-external-link"></i></span></p>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L2JhY2t1cC1jbHVzdGVyLmh0bWw=">Elastic - Backup Cluster<i class="fa fa-external-link-alt"></i></span></p>
 </li>
-<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3BsdWdpbnMvNy4xMC9yZXBvc2l0b3J5LXMzLmh0bWw=" title="https://www.elastic.co/guide/en/elasticsearch/plugins/7.10/repository-s3.html">S3 repository plugin<i class="fa fa-external-link"></i></span></p>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3BsdWdpbnMvNy4xMC9yZXBvc2l0b3J5LXMzLmh0bWw=">S3 repository plugin<i class="fa fa-external-link-alt"></i></span></p>
 </li>
-<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3BsdWdpbnMvY3VycmVudC9yZXBvc2l0b3J5LXMzLXJlcG9zaXRvcnkuaHRtbA==" title="https://www.elastic.co/guide/en/elasticsearch/plugins/current/repository-s3-repository.html">Repository settings<i class="fa fa-external-link"></i></span></p>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3BsdWdpbnMvY3VycmVudC9yZXBvc2l0b3J5LXMzLXJlcG9zaXRvcnkuaHRtbA==">Repository settings<i class="fa fa-external-link-alt"></i></span></p>
 </li>
-<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ibG9nL2ZvdW5kLWVsYXN0aWNzZWFyY2gtc25hcHNob3QtYW5kLXJlc3RvcmU=" title="https://www.elastic.co/blog/found-elasticsearch-snapshot-and-restore">ES - Snapshot and Restore (incremental snapshot mechanism)<i class="fa fa-external-link"></i></span></p>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ibG9nL2ZvdW5kLWVsYXN0aWNzZWFyY2gtc25hcHNob3QtYW5kLXJlc3RvcmU=">ES - Snapshot and Restore (incremental snapshot mechanism)<i class="fa fa-external-link-alt"></i></span></p>
 </li>
-<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL2NsaWVudC9jdXJhdG9yLzUuOC9pbmRleC5odG1s" title="https://www.elastic.co/guide/en/elasticsearch/client/curator/5.8/index.html">Elastic Curator<i class="fa fa-external-link"></i></span></p>
+<li><p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL2NsaWVudC9jdXJhdG9yLzUuOC9pbmRleC5odG1s">Elastic Curator<i class="fa fa-external-link-alt"></i></span></p>
 </li>
 </ul>
 
@@ -552,45 +551,45 @@
 
     <div class="social-list">
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="https://twitter.com/davidlu1001">
-                <span class="icon">
-                  <i class="fa fa-twitter"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/davidlu1001">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
 
-                <span class="label">Twitter</span>
-              </a>
-            </div>
+            <span class="label">Twitter</span>
+          </a>
+        </div>
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="https://t.me/nztrain">
-                <span class="icon">
-                  <i class="fa fa-telegram"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="https://t.me/nztrain">
+            <span class="icon">
+              <i class="fab fa-telegram"></i>
+            </span>
 
-                <span class="label">Telegram</span>
-              </a>
-            </div>
+            <span class="label">Telegram</span>
+          </a>
+        </div>
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="/images/wechat_channel.png">
-                <span class="icon">
-                  <i class="fa fa-wechat"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
 
-                <span class="label">WeChat</span>
-              </a>
-            </div>
+            <span class="label">WeChat</span>
+          </a>
+        </div>
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="/atom.xml">
-                <span class="icon">
-                  <i class="fa fa-rss"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
 
-                <span class="label">RSS</span>
-              </a>
-            </div>
+            <span class="label">RSS</span>
+          </a>
+        </div>
     </div>
   </div>
 
@@ -624,7 +623,6 @@
   
   
 
-  </div>
 
 
           </div>
@@ -716,13 +714,13 @@
 </div>
   <div class="links-of-author motion-element">
       <span class="links-of-author-item">
-        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;davidlu1001"><i class="fa fa-fw fa-github"></i></span>
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;davidlu1001"><i class="fab fa-github fa-fw"></i></span>
       </span>
       <span class="links-of-author-item">
-        <span class="exturl" data-url="aHR0cHM6Ly90d2l0dGVyLmNvbS9kYXZpZGx1MTAwMQ==" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;davidlu1001"><i class="fa fa-fw fa-twitter"></i></span>
+        <span class="exturl" data-url="aHR0cHM6Ly90d2l0dGVyLmNvbS9kYXZpZGx1MTAwMQ==" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;davidlu1001"><i class="fab fa-twitter fa-fw"></i></span>
       </span>
       <span class="links-of-author-item">
-        <span class="exturl" data-url="bWFpbHRvOmRhdmlkbHUxMDAxQGdtYWlsLmNvbQ==" title="E-Mail → mailto:davidlu1001@gmail.com"><i class="fa fa-fw fa-envelope"></i></span>
+        <span class="exturl" data-url="bWFpbHRvOmRhdmlkbHUxMDAxQGdtYWlsLmNvbQ==" title="E-Mail → mailto:davidlu1001@gmail.com"><i class="fa fa-envelope fa-fw"></i></span>
       </span>
   </div>
 
@@ -741,18 +739,38 @@
     <footer class="footer">
       <div class="footer-inner">
         
+  <div class="languages">
+    <label class="lang-select-label">
+      <i class="fa fa-language"></i>
+      <span>English</span>
+      <i class="fa fa-angle-up" aria-hidden="true"></i>
+    </label>
+    <select class="lang-select" data-canonical="">
+      
+        <option value="en" data-href="/2020/12/12/ElasticSearch-backup-with-AWS-S3/" selected="">
+          English
+        </option>
+      
+        <option value="zh-CN" data-href="/zh-CN/2020/12/12/ElasticSearch-backup-with-AWS-S3/" selected="">
+          简体中文
+        </option>
+      
+    </select>
+  </div>
+
+        
 
 <div class="copyright">
   
-  &copy; 2015 – 
+  &copy; 
   <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">David Lu</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
-      <i class="fa fa-area-chart"></i>
+      <i class="fa fa-chart-area"></i>
     </span>
     <span title="Symbols count total">103k</span>
     <span class="post-meta-divider">|</span>
@@ -761,6 +779,8 @@
     </span>
     <span title="Reading time total">1:33</span>
 </div>
+  <div class="powered-by">Powered by <span class="exturl theme-link" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl theme-link" data-url="aHR0cHM6Ly9waXNjZXMudGhlbWUtbmV4dC5vcmc=">NexT.Pisces</span>
+  </div>
 
         
 <div class="busuanzi-count">
@@ -797,6 +817,10 @@
 
   
   <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
 

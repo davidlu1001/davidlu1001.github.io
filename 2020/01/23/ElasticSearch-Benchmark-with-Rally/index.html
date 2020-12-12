@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en,zh-CN,default">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -16,11 +16,12 @@
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"davidlu1001.github.io","root":"/","scheme":"Pisces","version":"7.7.2","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"davidlu1001.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="OverviewWe need to perform the ES benchmark for the following purposes:  Experiment with some configurations of ES for tuning  Compare the performance differences between different versions of ES  Cap">
@@ -48,7 +49,8 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : true
+    isPost : true,
+    lang   : 'en'
   };
 </script>
 
@@ -111,15 +113,12 @@
 
   <div class="site-meta">
 
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Davidlu's Blog</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-        <h1 class="site-subtitle" itemprop="description">SRE | DevOps</h1>
-      
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Davidlu's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">SRE | DevOps</p>
   </div>
 
   <div class="site-nav-right">
@@ -130,37 +129,38 @@
 </div>
 
 
+
+
 <nav class="site-nav">
-  
-  <ul id="menu" class="menu">
+  <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
 
   </li>
         <li class="menu-item menu-item-about">
 
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
 
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">26</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">15</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">17</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
 
   </li>
         <li class="menu-item menu-item-sitemap">
 
-    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>Sitemap</a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -168,17 +168,18 @@
         </a>
       </li>
   </ul>
-
 </nav>
-  <div class="site-search">
-    <div class="search-pop-overlay">
-  <div class="popup search-popup">
-      <div class="search-header">
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
   <span class="search-icon">
     <i class="fa fa-search"></i>
   </span>
   <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+    <input autocomplete="off" autocapitalize="off"
            placeholder="Searching..." spellcheck="false"
            type="search" class="search-input">
   </div>
@@ -192,10 +193,9 @@
   </div>
 </div>
 
+    </div>
   </div>
-</div>
 
-  </div>
 </div>
     </header>
 
@@ -211,14 +211,13 @@
         <div class="content-wrap">
           
 
-          <div class="content">
+          <div class="content post posts-expand">
             
 
-  <div class="posts-expand">
-      
+    
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://davidlu1001.github.io/2020/01/23/ElasticSearch-Benchmark-with-Rally/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -231,14 +230,14 @@
       <meta itemprop="name" content="Davidlu's Blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
+        <h1 class="post-title" itemprop="name headline">
           ElasticSearch Benchmark with Rally
-        </h2>
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
@@ -246,7 +245,7 @@
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
+                <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
@@ -270,7 +269,7 @@
   <span class="post-meta-item">
     
       <span class="post-meta-item-icon">
-        <i class="fa fa-comment-o"></i>
+        <i class="far fa-comment"></i>
       </span>
       <span class="post-meta-item-text">Disqus: </span>
     
@@ -282,14 +281,14 @@
   <br>
             <span class="post-meta-item" title="Symbols count in article">
               <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
+                <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
               <span>4.4k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
+                <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
               <span>4 mins.</span>
@@ -323,8 +322,8 @@
 </ol>
 </li>
 </ul>
-<h1 id="Tool"><a href="#Tool" class="headerlink" title="Tool"></a>Tool</h1><p>Several tools are available for performance testing, e.g. <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhbmllbGZpcmVtYW4vZXNwZXJm" title="https://github.com/danielfireman/esperf">esperf<i class="fa fa-external-link"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2xvZ3ppby9lbGFzdGljc2VhcmNoLXN0cmVzcy10ZXN0" title="https://github.com/logzio/elasticsearch-stress-test">elasticsearch-stress-test<i class="fa fa-external-link"></i></span> or JMeter. </p>
-<p>Here we’ll use Elastic official tool <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2VsYXN0aWMvcmFsbHk=" title="https://github.com/elastic/rally">esrally<i class="fa fa-external-link"></i></span>, which is a macrobenchmarking framework for Elasticsearch.</p>
+<h1 id="Tool"><a href="#Tool" class="headerlink" title="Tool"></a>Tool</h1><p>Several tools are available for performance testing, e.g. <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhbmllbGZpcmVtYW4vZXNwZXJm">esperf<i class="fa fa-external-link-alt"></i></span>, <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2xvZ3ppby9lbGFzdGljc2VhcmNoLXN0cmVzcy10ZXN0">elasticsearch-stress-test<i class="fa fa-external-link-alt"></i></span> or JMeter. </p>
+<p>Here we’ll use Elastic official tool <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2VsYXN0aWMvcmFsbHk=">esrally<i class="fa fa-external-link-alt"></i></span>, which is a macrobenchmarking framework for Elasticsearch.</p>
 <a id="more"></a>
 
 <h1 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h1><p>Perform testing</p>
@@ -338,7 +337,7 @@
 <figure class="highlight gherkin"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line">$ esrally compare --baseline=2da942c3-6b1b-4056-93ba-b617819b4e49 --contender=31163590-ddbb-40e8-a2a8-e7c2d5fe59da</span><br><span class="line"></span><br><span class="line">|<span class="string">                                              Metric </span>|<span class="string">         Task </span>|<span class="string">    Baseline </span>|<span class="string">  Contender </span>|<span class="string">     Diff </span>|<span class="string">   Unit </span>|</span><br><span class="line">|<span class="string"> --------------------------------------------------: </span>|<span class="string"> -----------: </span>|<span class="string"> ----------: </span>|<span class="string"> ---------: </span>|<span class="string"> -------: </span>|<span class="string"> -----: </span>|</span><br><span class="line">|<span class="string">          Cumulative indexing time of primary shards </span>|<span class="string">              </span>|<span class="string">     39.8328 </span>|<span class="string">    42.3733 </span>|<span class="string">  2.54053 </span>|<span class="string">    min </span>|</span><br><span class="line">|<span class="string"> Cumulative indexing throttle time of primary shards </span>|<span class="string">              </span>|<span class="string">           0 </span>|<span class="string">          0 </span>|<span class="string">        0 </span>|<span class="string">    min </span>|</span><br><span class="line">|<span class="string">             Cumulative merge time of primary shards </span>|<span class="string">              </span>|<span class="string">     9.66415 </span>|<span class="string">    10.4054 </span>|<span class="string">  0.74123 </span>|<span class="string">    min </span>|</span><br><span class="line">|<span class="string">            Cumulative merge count of primary shards </span>|<span class="string">              </span>|<span class="string">          56 </span>|<span class="string">        134 </span>|<span class="string">       78 </span>|<span class="string">        </span>|</span><br><span class="line">|<span class="string">    Cumulative merge throttle time of primary shards </span>|<span class="string">              </span>|<span class="string">   0.0255833 </span>|<span class="string">    0.01175 </span>|<span class="string"> -0.01383 </span>|<span class="string">    min </span>|</span><br><span class="line">|<span class="string">           Cumulative refresh time of primary shards </span>|<span class="string">              </span>|<span class="string">     9.38755 </span>|<span class="string">    10.4285 </span>|<span class="string">  1.04098 </span>|<span class="string">    min </span>|</span><br><span class="line">|<span class="string">          Cumulative refresh count of primary shards </span>|<span class="string">              </span>|<span class="string">         905 </span>|<span class="string">       1672 </span>|<span class="string">      767 </span>|<span class="string">        </span>|</span><br><span class="line">|<span class="string">             Cumulative flush time of primary shards </span>|<span class="string">              </span>|<span class="string">     0.01605 </span>|<span class="string"> 0.00281667 </span>|<span class="string"> -0.01323 </span>|<span class="string">    min </span>|</span><br><span class="line">|<span class="string">            Cumulative flush count of primary shards </span>|<span class="string">              </span>|<span class="string">          21 </span>|<span class="string">         22 </span>|<span class="string">        1 </span>|<span class="string">        </span>|</span><br><span class="line">|<span class="string">                                  Total Young Gen GC </span>|<span class="string">              </span>|<span class="string">      67.529 </span>|<span class="string">     71.123 </span>|<span class="string">    3.594 </span>|<span class="string">      s </span>|</span><br><span class="line">|<span class="string">                                    Total Old Gen GC </span>|<span class="string">              </span>|<span class="string">       6.193 </span>|<span class="string">      7.579 </span>|<span class="string">    1.386 </span>|<span class="string">      s </span>|</span><br><span class="line">|<span class="string">                                          Store size </span>|<span class="string">              </span>|<span class="string">     3.34169 </span>|<span class="string">    3.33626 </span>|<span class="string"> -0.00543 </span>|<span class="string">     GB </span>|</span><br><span class="line">|<span class="string">                                       Translog size </span>|<span class="string">              </span>|<span class="string"> 9.73232e-07 </span>|<span class="string">  0.0140035 </span>|<span class="string">    0.014 </span>|<span class="string">     GB </span>|</span><br><span class="line">|<span class="string">                              Heap used for segments </span>|<span class="string">              </span>|<span class="string">     4.85796 </span>|<span class="string">    4.75913 </span>|<span class="string"> -0.09883 </span>|<span class="string">     MB </span>|</span><br><span class="line">|<span class="string">                            Heap used for doc values </span>|<span class="string">              </span>|<span class="string">    0.164585 </span>|<span class="string">   0.368065 </span>|<span class="string">  0.20348 </span>|<span class="string">     MB </span>|</span><br><span class="line">|<span class="string">                                 Heap used for terms </span>|<span class="string">              </span>|<span class="string">     3.38647 </span>|<span class="string">    3.11659 </span>|<span class="string"> -0.26988 </span>|<span class="string">     MB </span>|</span><br><span class="line">|<span class="string">                                 Heap used for norms </span>|<span class="string">              </span>|<span class="string">    0.213257 </span>|<span class="string">    0.17749 </span>|<span class="string"> -0.03577 </span>|<span class="string">     MB </span>|</span><br><span class="line">|<span class="string">                                Heap used for points </span>|<span class="string">              </span>|<span class="string">    0.291598 </span>|<span class="string">   0.292653 </span>|<span class="string">  0.00105 </span>|<span class="string">     MB </span>|</span><br><span class="line">|<span class="string">                         Heap used for stored fields </span>|<span class="string">              </span>|<span class="string">    0.802048 </span>|<span class="string">   0.804329 </span>|<span class="string">  0.00228 </span>|<span class="string">     MB </span>|</span><br><span class="line">|<span class="string">                                       Segment count </span>|<span class="string">              </span>|<span class="string">         279 </span>|<span class="string">        256 </span>|<span class="string">      -23 </span>|<span class="string">        </span>|</span><br><span class="line">|<span class="string">                                      Min Throughput </span>|<span class="string"> index-append </span>|<span class="string">     21224.1 </span>|<span class="string">    20200.1 </span>|<span class="string"> -1023.95 </span>|<span class="string"> docs/s </span>|</span><br><span class="line">|<span class="string">                                   Median Throughput </span>|<span class="string"> index-append </span>|<span class="string">     22499.3 </span>|<span class="string">    21105.1 </span>|<span class="string"> -1394.22 </span>|<span class="string"> docs/s </span>|</span><br><span class="line">|<span class="string">                                      Max Throughput </span>|<span class="string"> index-append </span>|<span class="string">     22846.2 </span>|<span class="string">    22496.8 </span>|<span class="string"> -349.333 </span>|<span class="string"> docs/s </span>|</span><br><span class="line">|<span class="string">                             50th percentile latency </span>|<span class="string"> index-append </span>|<span class="string">     1625.08 </span>|<span class="string">    1669.35 </span>|<span class="string">  44.2758 </span>|<span class="string">     ms </span>|</span><br><span class="line">|<span class="string">                             90th percentile latency </span>|<span class="string"> index-append </span>|<span class="string">     2536.77 </span>|<span class="string">    2698.41 </span>|<span class="string">  161.644 </span>|<span class="string">     ms </span>|</span><br><span class="line">|<span class="string">                             99th percentile latency </span>|<span class="string"> index-append </span>|<span class="string">     5182.57 </span>|<span class="string">    6829.08 </span>|<span class="string">  1646.51 </span>|<span class="string">     ms </span>|</span><br><span class="line">|<span class="string">                           99.9th percentile latency </span>|<span class="string"> index-append </span>|<span class="string">     20297.2 </span>|<span class="string">    9961.53 </span>|<span class="string"> -10335.7 </span>|<span class="string">     ms </span>|</span><br><span class="line">|<span class="string">                            100th percentile latency </span>|<span class="string"> index-append </span>|<span class="string">       21013 </span>|<span class="string">    10312.9 </span>|<span class="string"> -10700.1 </span>|<span class="string">     ms </span>|</span><br><span class="line">|<span class="string">                                          error rate </span>|<span class="string"> index-append </span>|<span class="string">           0 </span>|<span class="string">          0 </span>|<span class="string">        0 </span>|<span class="string">      % </span>|</span><br></pre></td></tr></table></figure>
 
 <p>We can also specify another ES to store the result, and compare / visualize in Kibana.</p>
-<p>More usage info could be found <span class="exturl" data-url="aHR0cHM6Ly9lc3JhbGx5LnJlYWR0aGVkb2NzLmlvL2VuL3N0YWJsZS9pbmRleC5odG1s" title="https://esrally.readthedocs.io/en/stable/index.html">here<i class="fa fa-external-link"></i></span>.</p>
+<p>More usage info could be found <span class="exturl" data-url="aHR0cHM6Ly9lc3JhbGx5LnJlYWR0aGVkb2NzLmlvL2VuL3N0YWJsZS9pbmRleC5odG1s">here<i class="fa fa-external-link-alt"></i></span>.</p>
 <h1 id="Monitoring"><a href="#Monitoring" class="headerlink" title="Monitoring"></a>Monitoring</h1><h2 id="Key-Metrics"><a href="#Key-Metrics" class="headerlink" title="Key Metrics"></a>Key Metrics</h2><ul>
 <li><p>Throughput: The throughput of each operation, such as index, search, etc.</p>
 </li>
@@ -347,8 +346,8 @@
 <li><p>Heap used for X</p>
 </li>
 </ul>
-<p>More info for metrics: <span class="exturl" data-url="aHR0cHM6Ly9lc3JhbGx5LnJlYWR0aGVkb2NzLmlvL2VuL2xhdGVzdC9zdW1tYXJ5X3JlcG9ydC5odG1s" title="https://esrally.readthedocs.io/en/latest/summary_report.html">summary report<i class="fa fa-external-link"></i></span></p>
-<h2 id="General-Metrics-from-Kibana"><a href="#General-Metrics-from-Kibana" class="headerlink" title="General Metrics from Kibana"></a>General Metrics from Kibana</h2><p><img src="/images/kibana_metrics.png" alt="Metrics from Kibana 7"></p>
+<p>More info for metrics: <span class="exturl" data-url="aHR0cHM6Ly9lc3JhbGx5LnJlYWR0aGVkb2NzLmlvL2VuL2xhdGVzdC9zdW1tYXJ5X3JlcG9ydC5odG1s">summary report<i class="fa fa-external-link-alt"></i></span></p>
+<h2 id="General-Metrics-from-Kibana"><a href="#General-Metrics-from-Kibana" class="headerlink" title="General Metrics from Kibana"></a>General Metrics from Kibana</h2><p><img data-src="/images/kibana_metrics.png" alt="Metrics from Kibana 7"></p>
 <h1 id="Plan"><a href="#Plan" class="headerlink" title="Plan"></a>Plan</h1><ul>
 <li><p>Performance testing for ES7 with different settings - Locally (with Docker)</p>
 </li>
@@ -356,12 +355,12 @@
 </li>
 </ul>
 <p>Results will be stored in CSV format, or can be setup and compare in Kibana for better visualization.</p>
-<h1 id="Testing"><a href="#Testing" class="headerlink" title="Testing"></a>Testing</h1><p>The testing benchmark configurations are coming from <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L3R1bmUtZm9yLWluZGV4aW5nLXNwZWVkLmh0bWw=" title="https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-for-indexing-speed.html">Tune for indexing speed<i class="fa fa-external-link"></i></span> and <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L3N5c3RlbS1jb25maWcuaHRtbA==" title="https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config.html">Important System Configrations<i class="fa fa-external-link"></i></span></p>
-<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><span class="exturl" data-url="aHR0cHM6Ly9lc3JhbGx5LnJlYWR0aGVkb2NzLmlvL2VuL3N0YWJsZS9pbmRleC5odG1s" title="https://esrally.readthedocs.io/en/stable/index.html">Rally official doc<i class="fa fa-external-link"></i></span></p>
-<p><span class="exturl" data-url="aHR0cHM6Ly90ZWNoLmViYXlpbmMuY29tL2VuZ2luZWVyaW5nL2VsYXN0aWNzZWFyY2gtcGVyZm9ybWFuY2UtdHVuaW5nLXByYWN0aWNlLWF0LWViYXkv" title="https://tech.ebayinc.com/engineering/elasticsearch-performance-tuning-practice-at-ebay/">Performance Tuning Practice at Ebay<i class="fa fa-external-link"></i></span></p>
-<p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L3R1bmUtZm9yLWluZGV4aW5nLXNwZWVkLmh0bWw=" title="https://www.elastic.co/guide/en/elasticsearch/reference/current/tune-for-indexing-speed.html">Tune for indexing speed<i class="fa fa-external-link"></i></span></p>
-<p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L3N5c3RlbS1jb25maWcuaHRtbA==" title="https://www.elastic.co/guide/en/elasticsearch/reference/current/system-config.html">Important System Configrations<i class="fa fa-external-link"></i></span></p>
-<p><span class="exturl" data-url="aHR0cDovL2Jsb2cuc2NvdHRsb2dpYy5jb20vMjAxNi8xMS8yMi91c2luZy1yYWxseS10by1iZW5jaG1hcmstZWxhc3RpY3NlYXJjaC5odG1s" title="http://blog.scottlogic.com/2016/11/22/using-rally-to-benchmark-elasticsearch.html">Using Rally to benchmark Elasticsearch queries<i class="fa fa-external-link"></i></span></p>
+<h1 id="Testing"><a href="#Testing" class="headerlink" title="Testing"></a>Testing</h1><p>The testing benchmark configurations are coming from <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L3R1bmUtZm9yLWluZGV4aW5nLXNwZWVkLmh0bWw=">Tune for indexing speed<i class="fa fa-external-link-alt"></i></span> and <span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L3N5c3RlbS1jb25maWcuaHRtbA==">Important System Configrations<i class="fa fa-external-link-alt"></i></span></p>
+<h1 id="References"><a href="#References" class="headerlink" title="References"></a>References</h1><p><span class="exturl" data-url="aHR0cHM6Ly9lc3JhbGx5LnJlYWR0aGVkb2NzLmlvL2VuL3N0YWJsZS9pbmRleC5odG1s">Rally official doc<i class="fa fa-external-link-alt"></i></span></p>
+<p><span class="exturl" data-url="aHR0cHM6Ly90ZWNoLmViYXlpbmMuY29tL2VuZ2luZWVyaW5nL2VsYXN0aWNzZWFyY2gtcGVyZm9ybWFuY2UtdHVuaW5nLXByYWN0aWNlLWF0LWViYXkv">Performance Tuning Practice at Ebay<i class="fa fa-external-link-alt"></i></span></p>
+<p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L3R1bmUtZm9yLWluZGV4aW5nLXNwZWVkLmh0bWw=">Tune for indexing speed<i class="fa fa-external-link-alt"></i></span></p>
+<p><span class="exturl" data-url="aHR0cHM6Ly93d3cuZWxhc3RpYy5jby9ndWlkZS9lbi9lbGFzdGljc2VhcmNoL3JlZmVyZW5jZS9jdXJyZW50L3N5c3RlbS1jb25maWcuaHRtbA==">Important System Configrations<i class="fa fa-external-link-alt"></i></span></p>
+<p><span class="exturl" data-url="aHR0cDovL2Jsb2cuc2NvdHRsb2dpYy5jb20vMjAxNi8xMS8yMi91c2luZy1yYWxseS10by1iZW5jaG1hcmstZWxhc3RpY3NlYXJjaC5odG1s">Using Rally to benchmark Elasticsearch queries<i class="fa fa-external-link-alt"></i></span></p>
 
     </div>
 
@@ -395,45 +394,45 @@
 
     <div class="social-list">
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="https://twitter.com/davidlu1001">
-                <span class="icon">
-                  <i class="fa fa-twitter"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/davidlu1001">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
 
-                <span class="label">Twitter</span>
-              </a>
-            </div>
+            <span class="label">Twitter</span>
+          </a>
+        </div>
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="https://t.me/nztrain">
-                <span class="icon">
-                  <i class="fa fa-telegram"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="https://t.me/nztrain">
+            <span class="icon">
+              <i class="fab fa-telegram"></i>
+            </span>
 
-                <span class="label">Telegram</span>
-              </a>
-            </div>
+            <span class="label">Telegram</span>
+          </a>
+        </div>
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="/images/wechat_channel.png">
-                <span class="icon">
-                  <i class="fa fa-wechat"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
 
-                <span class="label">WeChat</span>
-              </a>
-            </div>
+            <span class="label">WeChat</span>
+          </a>
+        </div>
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="/atom.xml">
-                <span class="icon">
-                  <i class="fa fa-rss"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
 
-                <span class="label">RSS</span>
-              </a>
-            </div>
+            <span class="label">RSS</span>
+          </a>
+        </div>
     </div>
   </div>
 
@@ -467,7 +466,6 @@
   
   
 
-  </div>
 
 
           </div>
@@ -559,13 +557,13 @@
 </div>
   <div class="links-of-author motion-element">
       <span class="links-of-author-item">
-        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;davidlu1001"><i class="fa fa-fw fa-github"></i></span>
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;davidlu1001"><i class="fab fa-github fa-fw"></i></span>
       </span>
       <span class="links-of-author-item">
-        <span class="exturl" data-url="aHR0cHM6Ly90d2l0dGVyLmNvbS9kYXZpZGx1MTAwMQ==" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;davidlu1001"><i class="fa fa-fw fa-twitter"></i></span>
+        <span class="exturl" data-url="aHR0cHM6Ly90d2l0dGVyLmNvbS9kYXZpZGx1MTAwMQ==" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;davidlu1001"><i class="fab fa-twitter fa-fw"></i></span>
       </span>
       <span class="links-of-author-item">
-        <span class="exturl" data-url="bWFpbHRvOmRhdmlkbHUxMDAxQGdtYWlsLmNvbQ==" title="E-Mail → mailto:davidlu1001@gmail.com"><i class="fa fa-fw fa-envelope"></i></span>
+        <span class="exturl" data-url="bWFpbHRvOmRhdmlkbHUxMDAxQGdtYWlsLmNvbQ==" title="E-Mail → mailto:davidlu1001@gmail.com"><i class="fa fa-envelope fa-fw"></i></span>
       </span>
   </div>
 
@@ -584,18 +582,38 @@
     <footer class="footer">
       <div class="footer-inner">
         
+  <div class="languages">
+    <label class="lang-select-label">
+      <i class="fa fa-language"></i>
+      <span>English</span>
+      <i class="fa fa-angle-up" aria-hidden="true"></i>
+    </label>
+    <select class="lang-select" data-canonical="">
+      
+        <option value="en" data-href="/2020/01/23/ElasticSearch-Benchmark-with-Rally/" selected="">
+          English
+        </option>
+      
+        <option value="zh-CN" data-href="/zh-CN/2020/01/23/ElasticSearch-Benchmark-with-Rally/" selected="">
+          简体中文
+        </option>
+      
+    </select>
+  </div>
+
+        
 
 <div class="copyright">
   
-  &copy; 2015 – 
+  &copy; 
   <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">David Lu</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
-      <i class="fa fa-area-chart"></i>
+      <i class="fa fa-chart-area"></i>
     </span>
     <span title="Symbols count total">103k</span>
     <span class="post-meta-divider">|</span>
@@ -604,6 +622,8 @@
     </span>
     <span title="Reading time total">1:33</span>
 </div>
+  <div class="powered-by">Powered by <span class="exturl theme-link" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl theme-link" data-url="aHR0cHM6Ly9waXNjZXMudGhlbWUtbmV4dC5vcmc=">NexT.Pisces</span>
+  </div>
 
         
 <div class="busuanzi-count">
@@ -640,6 +660,10 @@
 
   
   <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
 

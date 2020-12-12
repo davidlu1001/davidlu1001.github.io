@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en,zh-CN,default">
 <head>
   <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
@@ -16,11 +16,12 @@
 <link rel="stylesheet" href="/css/main.css">
 
 
-<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css">
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.css">
 
 <script id="hexo-configurations">
     var NexT = window.NexT || {};
-    var CONFIG = {"hostname":"davidlu1001.github.io","root":"/","scheme":"Pisces","version":"7.7.2","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
+    var CONFIG = {"hostname":"davidlu1001.github.io","root":"/","scheme":"Pisces","version":"7.8.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":true,"show_result":true,"style":"mac"},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":true,"mediumzoom":false,"lazyload":true,"pangu":true,"comments":{"style":"tabs","active":"disqus","storage":true,"lazyload":false,"nav":null,"activeClass":"disqus"},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":true,"trigger":"auto","top_n_per_article":5,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},"path":"search.xml"};
   </script>
 
   <meta name="description" content="Steps1. Check existing terraform version1terraform -v  2. Upgrade to Terraform 0.11 first (if applicable)If the current version is not 0.11 then upgrade it to 0.11.14 first. If you are on 0.11.x, plea">
@@ -47,7 +48,8 @@
   CONFIG.page = {
     sidebar: "",
     isHome : false,
-    isPost : true
+    isPost : true,
+    lang   : 'en'
   };
 </script>
 
@@ -110,15 +112,12 @@
 
   <div class="site-meta">
 
-    <div>
-      <a href="/" class="brand" rel="start">
-        <span class="logo-line-before"><i></i></span>
-        <span class="site-title">Davidlu's Blog</span>
-        <span class="logo-line-after"><i></i></span>
-      </a>
-    </div>
-        <h1 class="site-subtitle" itemprop="description">SRE | DevOps</h1>
-      
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Davidlu's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+      <p class="site-subtitle" itemprop="description">SRE | DevOps</p>
   </div>
 
   <div class="site-nav-right">
@@ -129,37 +128,38 @@
 </div>
 
 
+
+
 <nav class="site-nav">
-  
-  <ul id="menu" class="menu">
+  <ul id="menu" class="main-menu menu">
         <li class="menu-item menu-item-home">
 
-    <a href="/" rel="section"><i class="fa fa-fw fa-home"></i>Home</a>
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
 
   </li>
         <li class="menu-item menu-item-about">
 
-    <a href="/about/" rel="section"><i class="fa fa-fw fa-user"></i>About</a>
+    <a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
 
   </li>
         <li class="menu-item menu-item-tags">
 
-    <a href="/tags/" rel="section"><i class="fa fa-fw fa-tags"></i>Tags<span class="badge">26</span></a>
+    <a href="/tags/" rel="section"><i class="fa fa-tags fa-fw"></i>Tags</a>
 
   </li>
         <li class="menu-item menu-item-categories">
 
-    <a href="/categories/" rel="section"><i class="fa fa-fw fa-th"></i>Categories<span class="badge">15</span></a>
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>Categories</a>
 
   </li>
         <li class="menu-item menu-item-archives">
 
-    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>Archives<span class="badge">17</span></a>
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
 
   </li>
         <li class="menu-item menu-item-sitemap">
 
-    <a href="/sitemap.xml" rel="section"><i class="fa fa-fw fa-sitemap"></i>Sitemap</a>
+    <a href="/sitemap.xml" rel="section"><i class="fa fa-sitemap fa-fw"></i>Sitemap</a>
 
   </li>
       <li class="menu-item menu-item-search">
@@ -167,17 +167,18 @@
         </a>
       </li>
   </ul>
-
 </nav>
-  <div class="site-search">
-    <div class="search-pop-overlay">
-  <div class="popup search-popup">
-      <div class="search-header">
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup">
+        <div class="search-header">
   <span class="search-icon">
     <i class="fa fa-search"></i>
   </span>
   <div class="search-input-container">
-    <input autocomplete="off" autocorrect="off" autocapitalize="off"
+    <input autocomplete="off" autocapitalize="off"
            placeholder="Searching..." spellcheck="false"
            type="search" class="search-input">
   </div>
@@ -191,10 +192,9 @@
   </div>
 </div>
 
+    </div>
   </div>
-</div>
 
-  </div>
 </div>
     </header>
 
@@ -210,14 +210,13 @@
         <div class="content-wrap">
           
 
-          <div class="content">
+          <div class="content post posts-expand">
             
 
-  <div class="posts-expand">
-      
+    
   
   
-  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="en">
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
     <link itemprop="mainEntityOfPage" href="http://davidlu1001.github.io/2020/06/22/Terraform-Upgrade-to-0-12/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
@@ -230,14 +229,14 @@
       <meta itemprop="name" content="Davidlu's Blog">
     </span>
       <header class="post-header">
-        <h2 class="post-title" itemprop="name headline">
+        <h1 class="post-title" itemprop="name headline">
           Terraform Upgrade to 0.12
-        </h2>
+        </h1>
 
         <div class="post-meta">
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
+                <i class="far fa-calendar"></i>
               </span>
               <span class="post-meta-item-text">Posted on</span>
 
@@ -245,7 +244,7 @@
             </span>
             <span class="post-meta-item">
               <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
+                <i class="far fa-folder"></i>
               </span>
               <span class="post-meta-item-text">In</span>
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
@@ -273,7 +272,7 @@
   <span class="post-meta-item">
     
       <span class="post-meta-item-icon">
-        <i class="fa fa-comment-o"></i>
+        <i class="far fa-comment"></i>
       </span>
       <span class="post-meta-item-text">Disqus: </span>
     
@@ -285,14 +284,14 @@
   <br>
             <span class="post-meta-item" title="Symbols count in article">
               <span class="post-meta-item-icon">
-                <i class="fa fa-file-word-o"></i>
+                <i class="far fa-file-word"></i>
               </span>
                 <span class="post-meta-item-text">Symbols count in article: </span>
               <span>8.9k</span>
             </span>
             <span class="post-meta-item" title="Reading time">
               <span class="post-meta-item-icon">
-                <i class="fa fa-clock-o"></i>
+                <i class="far fa-clock"></i>
               </span>
                 <span class="post-meta-item-text">Reading time &asymp;</span>
               <span>8 mins.</span>
@@ -328,7 +327,7 @@
 <p>Run above command until there are no suggestions.</p>
 <h2 id="9-Switch-to-terraform-0-12"><a href="#9-Switch-to-terraform-0-12" class="headerlink" title="9. Switch to terraform 0.12"></a>9. Switch to terraform 0.12</h2><p>Switch to terraform 0.12 (choose one of the following methods, ranked in order of recommendation)</p>
 <ul>
-<li><p>Using <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3dhcnJlbnNib3gvdGVycmFmb3JtLXN3aXRjaGVy" title="https://github.com/warrensbox/terraform-switcher">tfswitch<i class="fa fa-external-link"></i></span> (recommend) / <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3RmdXRpbHMvdGZlbnY=" title="https://github.com/tfutils/tfenv">tfenv<i class="fa fa-external-link"></i></span> to switch to 0.12</p>
+<li><p>Using <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3dhcnJlbnNib3gvdGVycmFmb3JtLXN3aXRjaGVy">tfswitch<i class="fa fa-external-link-alt"></i></span> (recommend) / <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3RmdXRpbHMvdGZlbnY=">tfenv<i class="fa fa-external-link-alt"></i></span> to switch to 0.12</p>
 </li>
 <li><p>Using docker-terraform</p>
 </li>
@@ -398,14 +397,14 @@
 </ul>
 <figure class="highlight vhdl"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="literal">Error</span>: Incorrect <span class="keyword">attribute</span> value <span class="keyword">type</span></span><br><span class="line"> </span><br><span class="line">  <span class="keyword">on</span> .terraform/modules/container-crayola/container/main.tf <span class="literal">line</span> <span class="number">38</span>, <span class="keyword">in</span> resource <span class="string">&quot;aws_iam_policy_attachment&quot;</span> <span class="string">&quot;ci-attach&quot;</span>:</span><br><span class="line">  <span class="number">38</span>:   users      = [var.username, var.extra_ci_users]</span><br><span class="line">    |<span class="comment">----------------</span></span><br><span class="line">    | var.extra_ci_users <span class="keyword">is</span> empty tuple</span><br><span class="line">    | var.username <span class="keyword">is</span> <span class="string">&quot;ci-travis-crayola&quot;</span></span><br><span class="line"> </span><br><span class="line">Inappropriate value <span class="keyword">for</span> <span class="keyword">attribute</span> <span class="string">&quot;users&quot;</span>: element <span class="number">1</span>: <span class="built_in">string</span> required.</span><br></pre></td></tr></table></figure>
 
-<p>Referring to <span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL3VwZ3JhZGUtZ3VpZGVzLzAtMTIuaHRtbCNyZWZlcnJpbmctdG8tbGlzdC12YXJpYWJsZXM=" title="https://www.terraform.io/upgrade-guides/0-12.html#referring-to-list-variables">https://www.terraform.io/upgrade-guides/0-12.html#referring-to-list-variables<i class="fa fa-external-link"></i></span></p>
+<p>Referring to <span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL3VwZ3JhZGUtZ3VpZGVzLzAtMTIuaHRtbCNyZWZlcnJpbmctdG8tbGlzdC12YXJpYWJsZXM=">https://www.terraform.io/upgrade-guides/0-12.html#referring-to-list-variables<i class="fa fa-external-link-alt"></i></span></p>
 <p>The solution is just <code>remove the redundant list brackets</code> or add a <code>flatten</code> function.</p>
 <ul>
 <li>Unsupported attribute for lifecycle/ignore_changes</li>
 </ul>
 <figure class="highlight pgsql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">Error: Unsupported <span class="keyword">attribute</span></span><br><span class="line"> </span><br><span class="line">  <span class="keyword">on</span> .terraform/modules/balances-api_alb_target_group/alb-target-<span class="keyword">group</span>/target-<span class="keyword">group</span>.tf <span class="type">line</span> <span class="number">46</span>, <span class="keyword">in</span> resource &quot;aws_alb_target_group&quot; &quot;main&quot;:</span><br><span class="line">  <span class="number">46</span>:       healthy_threshold,</span><br><span class="line"> </span><br><span class="line">This <span class="keyword">object</span> has <span class="keyword">no</span> argument, nested block, <span class="keyword">or</span> exported <span class="keyword">attribute</span> named</span><br><span class="line">&quot;healthy_threshold&quot;.</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">Error: Unsupported <span class="keyword">attribute</span></span><br><span class="line"> </span><br><span class="line">  <span class="keyword">on</span> .terraform/modules/balances-api_task_definition/task-def-volumeless/main.tf <span class="type">line</span> <span class="number">8</span>, <span class="keyword">in</span> resource &quot;aws_ecs_task_definition&quot; &quot;main&quot;:</span><br><span class="line">   <span class="number">8</span>:     ignore_changes        = [image]</span><br><span class="line"> </span><br><span class="line">This <span class="keyword">object</span> has <span class="keyword">no</span> argument, nested block, <span class="keyword">or</span> exported <span class="keyword">attribute</span> named</span><br><span class="line">&quot;image&quot;.</span><br></pre></td></tr></table></figure>
 
-<p>Ref: <span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL2RvY3MvY29uZmlndXJhdGlvbi9yZXNvdXJjZXMuaHRtbCNsaWZlY3ljbGUtbGlmZWN5Y2xlLWN1c3RvbWl6YXRpb25z" title="https://www.terraform.io/docs/configuration/resources.html#lifecycle-lifecycle-customizations">https://www.terraform.io/docs/configuration/resources.html#lifecycle-lifecycle-customizations<i class="fa fa-external-link"></i></span></p>
+<p>Ref: <span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL2RvY3MvY29uZmlndXJhdGlvbi9yZXNvdXJjZXMuaHRtbCNsaWZlY3ljbGUtbGlmZWN5Y2xlLWN1c3RvbWl6YXRpb25z">https://www.terraform.io/docs/configuration/resources.html#lifecycle-lifecycle-customizations<i class="fa fa-external-link-alt"></i></span></p>
 <p><code>ignore_changes</code> can only support list of attribute names, but <code>image</code> is the sub-attribute name for <code>container_definitions</code></p>
 <ul>
 <li>Deperacated condition for lb_listener_rule</li>
@@ -426,8 +425,8 @@
 <figure class="highlight nginx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="section">condition</span> &#123;</span><br><span class="line">  <span class="section">host_header</span> &#123;</span><br><span class="line">    <span class="attribute">values</span> = [<span class="string">&quot;abc.hq.com&quot;</span>]</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 <p>This was a change introduced in terraform-providers/terraform-provider-aws#8268, which was released in AWS Provider 2.42.0.</p>
-<p>Ref: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2JyaWtpczk4L3RlcnJhZm9ybS11cC1hbmQtcnVubmluZy1jb2RlL2lzc3Vlcy80MyNpc3N1ZWNvbW1lbnQtNTY5NDQxNzc3" title="https://github.com/brikis98/terraform-up-and-running-code/issues/43#issuecomment-569441777">https://github.com/brikis98/terraform-up-and-running-code/issues/43#issuecomment-569441777<i class="fa fa-external-link"></i></span></p>
-<p>Doc: <span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL2RvY3MvcHJvdmlkZXJzL2F3cy9yL2xiX2xpc3RlbmVyX3J1bGUuaHRtbA==" title="https://www.terraform.io/docs/providers/aws/r/lb_listener_rule.html">https://www.terraform.io/docs/providers/aws/r/lb_listener_rule.html<i class="fa fa-external-link"></i></span></p>
+<p>Ref: <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2JyaWtpczk4L3RlcnJhZm9ybS11cC1hbmQtcnVubmluZy1jb2RlL2lzc3Vlcy80MyNpc3N1ZWNvbW1lbnQtNTY5NDQxNzc3">https://github.com/brikis98/terraform-up-and-running-code/issues/43#issuecomment-569441777<i class="fa fa-external-link-alt"></i></span></p>
+<p>Doc: <span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL2RvY3MvcHJvdmlkZXJzL2F3cy9yL2xiX2xpc3RlbmVyX3J1bGUuaHRtbA==">https://www.terraform.io/docs/providers/aws/r/lb_listener_rule.html<i class="fa fa-external-link-alt"></i></span></p>
 <ul>
 <li>After fix<br>After fix syntax issues in terraform-modules, need to update modules and re-run init / upgrade when necessary:</li>
 </ul>
@@ -448,26 +447,26 @@
 <p>Unfortunately after installing the latest VSCdoe extension (e.g. <code>2.0.1</code> - which officially support Terraform 0.12) it seems NOT working properly.</p>
 <p>Found bunch of errors:</p>
 <ul>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC92c2NvZGUtdGVycmFmb3JtL2lzc3Vlcy8zMjk=" title="https://github.com/hashicorp/vscode-terraform/issues/329">Workspace not initialized<i class="fa fa-external-link"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC92c2NvZGUtdGVycmFmb3JtL2lzc3Vlcy8zODY=" title="https://github.com/hashicorp/vscode-terraform/issues/386">Nothing works after update to 2.x<i class="fa fa-external-link"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL21pY3Jvc29mdC92c2NvZGUvaXNzdWVzLzk5Njk5" title="https://github.com/microsoft/vscode/issues/99699">“Server return 404” when trying to install an old version<i class="fa fa-external-link"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC92c2NvZGUtdGVycmFmb3JtL2lzc3Vlcy8zMjk=">Workspace not initialized<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC92c2NvZGUtdGVycmFmb3JtL2lzc3Vlcy8zODY=">Nothing works after update to 2.x<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL21pY3Jvc29mdC92c2NvZGUvaXNzdWVzLzk5Njk5">“Server return 404” when trying to install an old version<i class="fa fa-external-link-alt"></i></span></li>
 </ul>
 <p>The old version 1.40 used to work, so the <strong><em>workaround</em></strong>:</p>
 <ul>
-<li>Remove 2.0.1 extension from VS Code<br>Download 1.4.0 of the vsix from <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC92c2NvZGUtdGVycmFmb3JtL3JlbGVhc2VzL2Rvd25sb2FkL3YxLjQuMC9tYXV2ZS50ZXJyYWZvcm0tdjEuNC4wLnZzaXg=" title="https://github.com/hashicorp/vscode-terraform/releases/download/v1.4.0/mauve.terraform-v1.4.0.vsix">here<i class="fa fa-external-link"></i></span></li>
+<li>Remove 2.0.1 extension from VS Code<br>Download 1.4.0 of the vsix from <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC92c2NvZGUtdGVycmFmb3JtL3JlbGVhc2VzL2Rvd25sb2FkL3YxLjQuMC9tYXV2ZS50ZXJyYWZvcm0tdjEuNC4wLnZzaXg=">here<i class="fa fa-external-link-alt"></i></span></li>
 <li>Manually install it: <code>code --install-extension mauve.terraform-v1.4.0.vsix</code></li>
 <li>Restart VS Code</li>
 <li>When prompted install language server, choose: <code>v.0.0.11-beta2</code></li>
 <li>If no prompt can install manually: <code>⇧⌘P</code>, then type <code>Terraform: Enable/Disable Language Server</code> and install <code>v.0.0.11-beta2</code></li>
 </ul>
 <h2 id="Reference"><a href="#Reference" class="headerlink" title="Reference"></a>Reference</h2><ul>
-<li><span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL3VwZ3JhZGUtZ3VpZGVzLzAtMTIuaHRtbA==" title="https://www.terraform.io/upgrade-guides/0-12.html">Upgrade Guilds<i class="fa fa-external-link"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC90ZXJyYWZvcm0tZ3VpZGVzL3RyZWUvbWFzdGVyL2luZnJhc3RydWN0dXJlLWFzLWNvZGUvdGVycmFmb3JtLTAuMTItZXhhbXBsZXM=" title="https://github.com/hashicorp/terraform-guides/tree/master/infrastructure-as-code/terraform-0.12-examples">Useful 0.12 code examples<i class="fa fa-external-link"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC92c2NvZGUtdGVycmFmb3JtL2lzc3Vlcy8xOTUjaXNzdWVjb21tZW50LTU3ODE5NDE2MA==" title="https://github.com/hashicorp/vscode-terraform/issues/195#issuecomment-578194160">Terraform v0.12 - Syntax check broken: Unknown token IDENT<i class="fa fa-external-link"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL3VwZ3JhZGUtZ3VpZGVzLzAtMTIuaHRtbA==">Upgrade Guilds<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC90ZXJyYWZvcm0tZ3VpZGVzL3RyZWUvbWFzdGVyL2luZnJhc3RydWN0dXJlLWFzLWNvZGUvdGVycmFmb3JtLTAuMTItZXhhbXBsZXM=">Useful 0.12 code examples<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC92c2NvZGUtdGVycmFmb3JtL2lzc3Vlcy8xOTUjaXNzdWVjb21tZW50LTU3ODE5NDE2MA==">Terraform v0.12 - Syntax check broken: Unknown token IDENT<i class="fa fa-external-link-alt"></i></span></li>
 <li>Fix syntax issues<ul>
-<li><span class="exturl" data-url="aHR0cHM6Ly9kaXNjdXNzLmhhc2hpY29ycC5jb20vdC9zeW50YXgtaXNzdWVzLXdoaWxlLXVwZ3JhZGluZy1mcm9tLTExLTE0LXRvLXZlcnNpb24tMTIvNDM1Ng==" title="https://discuss.hashicorp.com/t/syntax-issues-while-upgrading-from-11-14-to-version-12/4356">syntax issue while upgrading from 11 to 12<i class="fa fa-external-link"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL3VwZ3JhZGUtZ3VpZGVzLzAtMTIuaHRtbCNtYXAtdmFyaWFibGVzLW5vLWxvbmdlci1tZXJnZS13aGVuLW92ZXJyaWRkZW4=" title="https://www.terraform.io/upgrade-guides/0-12.html#map-variables-no-longer-merge-when-overridden">map var no longer merge when overriden<i class="fa fa-external-link"></i></span></li>
-<li><span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL3VwZ3JhZGUtZ3VpZGVzLzAtMTIuaHRtbCNyZWZlcnJpbmctdG8tbGlzdC12YXJpYWJsZXM=" title="https://www.terraform.io/upgrade-guides/0-12.html#referring-to-list-variables">refering to list var<i class="fa fa-external-link"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9kaXNjdXNzLmhhc2hpY29ycC5jb20vdC9zeW50YXgtaXNzdWVzLXdoaWxlLXVwZ3JhZGluZy1mcm9tLTExLTE0LXRvLXZlcnNpb24tMTIvNDM1Ng==">syntax issue while upgrading from 11 to 12<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL3VwZ3JhZGUtZ3VpZGVzLzAtMTIuaHRtbCNtYXAtdmFyaWFibGVzLW5vLWxvbmdlci1tZXJnZS13aGVuLW92ZXJyaWRkZW4=">map var no longer merge when overriden<i class="fa fa-external-link-alt"></i></span></li>
+<li><span class="exturl" data-url="aHR0cHM6Ly93d3cudGVycmFmb3JtLmlvL3VwZ3JhZGUtZ3VpZGVzLzAtMTIuaHRtbCNyZWZlcnJpbmctdG8tbGlzdC12YXJpYWJsZXM=">refering to list var<i class="fa fa-external-link-alt"></i></span></li>
 </ul>
 </li>
 </ul>
@@ -504,45 +503,45 @@
 
     <div class="social-list">
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="https://twitter.com/davidlu1001">
-                <span class="icon">
-                  <i class="fa fa-twitter"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="https://twitter.com/davidlu1001">
+            <span class="icon">
+              <i class="fab fa-twitter"></i>
+            </span>
 
-                <span class="label">Twitter</span>
-              </a>
-            </div>
+            <span class="label">Twitter</span>
+          </a>
+        </div>
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="https://t.me/nztrain">
-                <span class="icon">
-                  <i class="fa fa-telegram"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="https://t.me/nztrain">
+            <span class="icon">
+              <i class="fab fa-telegram"></i>
+            </span>
 
-                <span class="label">Telegram</span>
-              </a>
-            </div>
+            <span class="label">Telegram</span>
+          </a>
+        </div>
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="/images/wechat_channel.png">
-                <span class="icon">
-                  <i class="fa fa-wechat"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/images/wechat_channel.png">
+            <span class="icon">
+              <i class="fab fa-weixin"></i>
+            </span>
 
-                <span class="label">WeChat</span>
-              </a>
-            </div>
+            <span class="label">WeChat</span>
+          </a>
+        </div>
 
-            <div class="social-item">
-              <a target="_blank" class="social-link" href="/atom.xml">
-                <span class="icon">
-                  <i class="fa fa-rss"></i>
-                </span>
+        <div class="social-item">
+          <a target="_blank" class="social-link" href="/atom.xml">
+            <span class="icon">
+              <i class="fa fa-rss"></i>
+            </span>
 
-                <span class="label">RSS</span>
-              </a>
-            </div>
+            <span class="label">RSS</span>
+          </a>
+        </div>
     </div>
   </div>
 
@@ -577,7 +576,6 @@
   
   
 
-  </div>
 
 
           </div>
@@ -669,13 +667,13 @@
 </div>
   <div class="links-of-author motion-element">
       <span class="links-of-author-item">
-        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;davidlu1001"><i class="fa fa-fw fa-github"></i></span>
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhdmlkbHUxMDAx" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;davidlu1001"><i class="fab fa-github fa-fw"></i></span>
       </span>
       <span class="links-of-author-item">
-        <span class="exturl" data-url="aHR0cHM6Ly90d2l0dGVyLmNvbS9kYXZpZGx1MTAwMQ==" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;davidlu1001"><i class="fa fa-fw fa-twitter"></i></span>
+        <span class="exturl" data-url="aHR0cHM6Ly90d2l0dGVyLmNvbS9kYXZpZGx1MTAwMQ==" title="Twitter → https:&#x2F;&#x2F;twitter.com&#x2F;davidlu1001"><i class="fab fa-twitter fa-fw"></i></span>
       </span>
       <span class="links-of-author-item">
-        <span class="exturl" data-url="bWFpbHRvOmRhdmlkbHUxMDAxQGdtYWlsLmNvbQ==" title="E-Mail → mailto:davidlu1001@gmail.com"><i class="fa fa-fw fa-envelope"></i></span>
+        <span class="exturl" data-url="bWFpbHRvOmRhdmlkbHUxMDAxQGdtYWlsLmNvbQ==" title="E-Mail → mailto:davidlu1001@gmail.com"><i class="fa fa-envelope fa-fw"></i></span>
       </span>
   </div>
 
@@ -694,18 +692,38 @@
     <footer class="footer">
       <div class="footer-inner">
         
+  <div class="languages">
+    <label class="lang-select-label">
+      <i class="fa fa-language"></i>
+      <span>English</span>
+      <i class="fa fa-angle-up" aria-hidden="true"></i>
+    </label>
+    <select class="lang-select" data-canonical="">
+      
+        <option value="en" data-href="/2020/06/22/Terraform-Upgrade-to-0-12/" selected="">
+          English
+        </option>
+      
+        <option value="zh-CN" data-href="/zh-CN/2020/06/22/Terraform-Upgrade-to-0-12/" selected="">
+          简体中文
+        </option>
+      
+    </select>
+  </div>
+
+        
 
 <div class="copyright">
   
-  &copy; 2015 – 
+  &copy; 
   <span itemprop="copyrightYear">2020</span>
   <span class="with-love">
-    <i class="fa fa-user"></i>
+    <i class="fa fa-heart"></i>
   </span>
   <span class="author" itemprop="copyrightHolder">David Lu</span>
     <span class="post-meta-divider">|</span>
     <span class="post-meta-item-icon">
-      <i class="fa fa-area-chart"></i>
+      <i class="fa fa-chart-area"></i>
     </span>
     <span title="Symbols count total">103k</span>
     <span class="post-meta-divider">|</span>
@@ -714,6 +732,8 @@
     </span>
     <span title="Reading time total">1:33</span>
 </div>
+  <div class="powered-by">Powered by <span class="exturl theme-link" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <span class="exturl theme-link" data-url="aHR0cHM6Ly9waXNjZXMudGhlbWUtbmV4dC5vcmc=">NexT.Pisces</span>
+  </div>
 
         
 <div class="busuanzi-count">
@@ -750,6 +770,10 @@
 
   
   <script src="/lib/anime.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/jquery@3/dist/jquery.min.js"></script>
+  <script src="//cdn.jsdelivr.net/gh/fancyapps/fancybox@3/dist/jquery.fancybox.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/lozad@1/dist/lozad.min.js"></script>
+  <script src="//cdn.jsdelivr.net/npm/pangu@4/dist/browser/pangu.min.js"></script>
   <script src="/lib/velocity/velocity.min.js"></script>
   <script src="/lib/velocity/velocity.ui.min.js"></script>
 
