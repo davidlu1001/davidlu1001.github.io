@@ -235,6 +235,12 @@ chat:
 
 # Automatically excerpt description in homepage as preamble text.
 excerpt_description: true
+# Use <!-- more --> in the post to control excerpt accurately.
+auto_excerpt:
+  enable: true
+  length: 150
+# Automatically scroll page to section which is under <!-- more --> mark.
+scroll_to_more: true
 
 # Read more button
 # If true, the read more button will be displayed in excerpt section.
@@ -278,7 +284,7 @@ reward:
 follow_me:
   Twitter: https://twitter.com/davidlu1001 || twitter
   Telegram: https://t.me/nztrain || telegram
-  WeChat: /images/wechat_channel.jpg || wechat
+  WeChat: /images/wechat_channel.png || wechat
   RSS: /atom.xml || rss
 
 # Related popular posts
@@ -999,3 +1005,9 @@ vendors:
 css: css
 js: js
 images: images
+
+# Wechat Subscriber
+wechat_subscriber:
+  enabled: true
+  qcode: /uploads/wechat_qcode_wanderinginnz.jpg
+  description: Welcome to scan the WeChat official account above and subscribe to my blog!
