@@ -8,7 +8,9 @@ subtitle: "SRE | DevOps"
 description: "Technology enthusiast"
 keywords: "SRE, DevOps, Cloud, AWS, Python, Big Data"
 author: David Lu
-language: en
+language:
+  - en
+  - zh-CN
 timezone: ""
 
 # URL
@@ -98,7 +100,8 @@ ignore:
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
-theme: next
+#theme: next
+theme: next-latest
 
 # Deployment
 ## Docs: https://hexo.io/docs/deployment.html
