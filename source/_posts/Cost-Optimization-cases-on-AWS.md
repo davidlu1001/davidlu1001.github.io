@@ -15,6 +15,10 @@ abbrlink: 79eee546
 date: 2020-04-20 21:08:44
 ---
 
+***Slide uploaded on 01/Jul/2020***
+
+<iframe src="https://docs.google.com/presentation/d/e/2PACX-1vSopB1AL7XcOuGbqZxoTlNxnRE4ZKOcHOeIkvTAeIHQ5gvCQs69M8NV49u4dGgOR8fB34ryf2QuAHF_/embed?start=false&loop=false&delayms=3000" frameborder="0" width="960" height="569" allowfullscreen="true" mozallowfullscreen="true" webkitallowfullscreen="true"></iframe>
+
 ***Updated on 01/May/2020***
 
 There are other two areas where it is possible to reduce the AWS cost:
