@@ -144,7 +144,7 @@
 
   <url>
     <loc>http://davidlu1001.github.io/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>1.0</priority>
   </url>
@@ -152,182 +152,182 @@
   
   <url>
     <loc>http://davidlu1001.github.io/tags/AWS/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/Glue/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/ElasticSearch/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/AppSync/</loc>
-    <lastmod>2020-12-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://davidlu1001.github.io/tags/Savings-Plan/</loc>
-    <lastmod>2020-12-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://davidlu1001.github.io/tags/Reserved-Instances/</loc>
-    <lastmod>2020-12-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://davidlu1001.github.io/tags/SRE/</loc>
-    <lastmod>2020-12-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://davidlu1001.github.io/tags/Cost-Optimization/</loc>
-    <lastmod>2020-12-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://davidlu1001.github.io/tags/DevOps/</loc>
-    <lastmod>2020-12-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://davidlu1001.github.io/tags/Puppet/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/DB/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/RDS/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://davidlu1001.github.io/tags/SRE/</loc>
+    <lastmod>2021-01-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://davidlu1001.github.io/tags/Savings-Plan/</loc>
+    <lastmod>2021-01-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://davidlu1001.github.io/tags/Reserved-Instances/</loc>
+    <lastmod>2021-01-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://davidlu1001.github.io/tags/Cost-Optimization/</loc>
+    <lastmod>2021-01-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://davidlu1001.github.io/tags/DevOps/</loc>
+    <lastmod>2021-01-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://davidlu1001.github.io/tags/Puppet/</loc>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/Performance-Testing/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/CI-CD/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/Backup/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/Terraform/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/Rally/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/Makefile/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/Linux/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/StatsD/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/Datadog/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/Monitoring/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/Zookeeper/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/DR/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/S3/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/tags/curator/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
@@ -336,105 +336,105 @@
   
   <url>
     <loc>http://davidlu1001.github.io/categories/AWS/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/SRE/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/DevOps/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/Glue/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/ElasticSearch/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/Cost/</loc>
-    <lastmod>2020-12-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://davidlu1001.github.io/categories/Puppet/</loc>
-    <lastmod>2020-12-12</lastmod>
-    <changefreq>daily</changefreq>
-    <priority>0.6</priority>
-  </url>
-  
-  <url>
-    <loc>http://davidlu1001.github.io/categories/Linux/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/DB/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://davidlu1001.github.io/categories/Linux/</loc>
+    <lastmod>2021-01-17</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.6</priority>
+  </url>
+  
+  <url>
+    <loc>http://davidlu1001.github.io/categories/Puppet/</loc>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/Terraform/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/Performance/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/Monitoring/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/ZooKeeper/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/Testing/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
   
   <url>
     <loc>http://davidlu1001.github.io/categories/Curator/</loc>
-    <lastmod>2020-12-12</lastmod>
+    <lastmod>2021-01-17</lastmod>
     <changefreq>daily</changefreq>
     <priority>0.6</priority>
   </url>
