@@ -6,7 +6,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="http://davidlu1001.github.io/"/>
-  <updated>2020-12-11T11:08:50.000Z</updated>
+  <updated>2021-03-17T10:51:32.000Z</updated>
   <id>http://davidlu1001.github.io/</id>
   
   <author>
@@ -15,6 +15,37 @@
   </author>
   
   <generator uri="https://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Terraform - Add dependency for modules</title>
+    <link href="http://davidlu1001.github.io/2021/03/17/Terraform-Add-dependency-for-modules/"/>
+    <id>http://davidlu1001.github.io/2021/03/17/Terraform-Add-dependency-for-modules/</id>
+    <published>2021-03-17T10:51:32.000Z</published>
+    <updated>2021-03-17T10:51:32.000Z</updated>
+    
+    <content type="html"><![CDATA[<h4 id="Error"><a href="#Error" class="headerlink" title="Error"></a>Error</h4><blockquote><p>Error creating application autoscaling target: ValidationException: ECS service doesn’t exist: service/AAA</p></blockquote><p>Encountered this type of dependency issue before, but re-run terraform plan/apply usually can fix it, but not lucky this time :-)</p><p>After having a quick look, and found out the module <code>depends_on</code> (dependency between terraform modules) only officially supported for Terraform version 0.13 - <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhc2hpY29ycC90ZXJyYWZvcm0vaXNzdWVzLzEwNDYy">hashicorp/terraform#10462<i class="fa fa-external-link-alt"></i></span> - but we’re on version 0.12 unfortunately.</p><h4 id="Workaround"><a href="#Workaround" class="headerlink" title="Workaround"></a>Workaround</h4><p>Found the workaround <span class="exturl" data-url="aHR0cHM6Ly9kaXNjdXNzLmhhc2hpY29ycC5jb20vdC90aXBzLWhvd3RvLWltcGxlbWVudC1tb2R1bGUtZGVwZW5kcy1vbi1lbXVsYXRpb24vMjMwNQ==">here<i class="fa fa-external-link-alt"></i></span>:</p><blockquote><p>The key insight here is that variables are nodes in the dependency graph too, and so can use them as a “hub” for passing dependencies across the module boundary.</p></blockquote><h4 id="Example"><a href="#Example" class="headerlink" title="Example"></a>Example</h4><p>e.g.</p><p>In <strong>module A</strong> (e.g. with resource <code>aws_appautoscaling_target</code>)</p><ol><li>Add the following in <code>variables.yml</code>:</li></ol><figure class="highlight fsharp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">variable <span class="string">&quot;mod_depends_on&quot;</span> &#123;</span><br><span class="line">  <span class="class"><span class="keyword">type</span>    </span>= any</span><br><span class="line">  <span class="keyword">default</span> = <span class="keyword">null</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><ol start="2"><li>Add <code>depends_on</code> for resource A <code>aws_appautoscaling_target</code> (as depends_on can refer directly to variables in Terraform version 0.12)</li></ol><figure class="highlight lasso"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">resource <span class="string">&quot;aws_appautoscaling_target&quot;</span> <span class="string">&quot;target&quot;</span> &#123;</span><br><span class="line">  <span class="params">...</span></span><br><span class="line">  depends_on = <span class="meta">[</span><span class="built_in">var</span>.mod_depends_on<span class="meta">]</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure><p>In <strong>module B</strong> (e.g. with resource <code>aws_ecs_service</code>):</p><p>Just need to add the following:</p><figure class="highlight ini"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="attr">mod_depends_on</span> = [module.A]</span><br></pre></td></tr></table></figure><h4 id="Reference"><a href="#Reference" class="headerlink" title="Reference:"></a>Reference:</h4><p><span class="exturl" data-url="aHR0cHM6Ly9kaXNjdXNzLmhhc2hpY29ycC5jb20vdC90aXBzLWhvd3RvLWltcGxlbWVudC1tb2R1bGUtZGVwZW5kcy1vbi1lbXVsYXRpb24vMjMwNQ==">https://discuss.hashicorp.com/t/tips-howto-implement-module-depends-on-emulation/2305<i class="fa fa-external-link-alt"></i></span></p>]]></content>
+    
+    <summary type="html">
+    
+      
+      
+        &lt;h4 id=&quot;Error&quot;&gt;&lt;a href=&quot;#Error&quot; class=&quot;headerlink&quot; title=&quot;Error&quot;&gt;&lt;/a&gt;Error&lt;/h4&gt;&lt;blockquote&gt;
+&lt;p&gt;Error creating application autoscaling target
+      
+    
+    </summary>
+    
+    
+      <category term="SRE" scheme="http://davidlu1001.github.io/categories/SRE/"/>
+    
+      <category term="Terraform" scheme="http://davidlu1001.github.io/categories/Terraform/"/>
+    
+    
+      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
+    
+      <category term="Terraform" scheme="http://davidlu1001.github.io/tags/Terraform/"/>
+    
+  </entry>
   
   <entry>
     <title>ElasticSearch backup with AWS S3</title>
@@ -88,18 +119,18 @@
     </summary>
     
     
-      <category term="SRE" scheme="http://davidlu1001.github.io/categories/SRE/"/>
-    
       <category term="DevOps" scheme="http://davidlu1001.github.io/categories/DevOps/"/>
+    
+      <category term="SRE" scheme="http://davidlu1001.github.io/categories/SRE/"/>
     
       <category term="Terraform" scheme="http://davidlu1001.github.io/categories/Terraform/"/>
     
     
       <category term="AWS" scheme="http://davidlu1001.github.io/tags/AWS/"/>
     
-      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
-    
       <category term="DevOps" scheme="http://davidlu1001.github.io/tags/DevOps/"/>
+    
+      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
     
       <category term="Terraform" scheme="http://davidlu1001.github.io/tags/Terraform/"/>
     
@@ -145,11 +176,11 @@
     
       <category term="AWS" scheme="http://davidlu1001.github.io/tags/AWS/"/>
     
-      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
-    
       <category term="Savings Plan" scheme="http://davidlu1001.github.io/tags/Savings-Plan/"/>
     
       <category term="Reserved Instances" scheme="http://davidlu1001.github.io/tags/Reserved-Instances/"/>
+    
+      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
     
       <category term="Cost Optimization" scheme="http://davidlu1001.github.io/tags/Cost-Optimization/"/>
     
@@ -402,11 +433,11 @@
     
       <category term="AWS" scheme="http://davidlu1001.github.io/tags/AWS/"/>
     
+      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
+    
       <category term="DB" scheme="http://davidlu1001.github.io/tags/DB/"/>
     
       <category term="RDS" scheme="http://davidlu1001.github.io/tags/RDS/"/>
-    
-      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
     
   </entry>
   
@@ -566,16 +597,16 @@
     </summary>
     
     
-      <category term="SRE" scheme="http://davidlu1001.github.io/categories/SRE/"/>
-    
       <category term="DevOps" scheme="http://davidlu1001.github.io/categories/DevOps/"/>
+    
+      <category term="SRE" scheme="http://davidlu1001.github.io/categories/SRE/"/>
     
       <category term="Terraform" scheme="http://davidlu1001.github.io/categories/Terraform/"/>
     
     
-      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
-    
       <category term="DevOps" scheme="http://davidlu1001.github.io/tags/DevOps/"/>
+    
+      <category term="SRE" scheme="http://davidlu1001.github.io/tags/SRE/"/>
     
       <category term="Terraform" scheme="http://davidlu1001.github.io/tags/Terraform/"/>
     
@@ -640,9 +671,9 @@
     
       <category term="SRE" scheme="http://davidlu1001.github.io/categories/SRE/"/>
     
-      <category term="Glue" scheme="http://davidlu1001.github.io/categories/Glue/"/>
-    
       <category term="ElasticSearch" scheme="http://davidlu1001.github.io/categories/ElasticSearch/"/>
+    
+      <category term="Glue" scheme="http://davidlu1001.github.io/categories/Glue/"/>
     
     
       <category term="AWS" scheme="http://davidlu1001.github.io/tags/AWS/"/>

@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>http://davidlu1001.github.io/2021/03/17/Terraform-Add-dependency-for-modules/</loc>
+    <lastmod>2021-03-17</lastmod>
+  </url>
+  <url>
     <loc>http://davidlu1001.github.io/2020/12/12/ElasticSearch-backup-with-AWS-S3/</loc>
     <lastmod>2020-12-11</lastmod>
   </url>
